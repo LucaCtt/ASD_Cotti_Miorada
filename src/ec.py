@@ -2,7 +2,7 @@ import numpy as np
 import time
 
 
-class EC():
+class EC:
     def __init__(self, A, time_limit):
         self.__A = A
         self.__rows, self.cols = A.shape
@@ -17,7 +17,6 @@ class EC():
 
         # Flag che indica se la ricerca deve essere interrotta
         self.__stop_flag = False
-
 
         self.__start_time = time.time()
         self.__time_limit = time_limit
@@ -84,3 +83,38 @@ class EC():
             return False
 
         return (time.time() - self.__start_time > self.__time_limit)
+
+
+def read_input(input_file):
+    A = []
+
+    with open(input_file, "r") as file:
+        for line in file:
+            if ';;;' in line:
+                continue
+            if '-' in line:
+                line = list(line.split())
+                elements = []
+                for element in line[0:-1]:
+                    elements.append(int(element))
+                A.append(elements)
+
+    return np.array(A, dtype=int)
+
+
+def write_output(output_file, A, COV, execution_time):
+    with open(output_file, "w") as file:
+        idx = 1
+        for x in A:
+            file.write(f';;; Insieme {str(idx)}\n{str(x)}\n')
+            idx += 1
+        file.write('\n;;; COV:\n')
+        if COV == []:
+            file.write(';;; Copertura esatta NON trovata\n')
+        else:
+            for x in COV:
+                x = np.array(x, dtype=int)
+                file.write(str(x+1) + '\n')
+        file.write('\n;;; Algoritmo EC\n')
+        file.write(';;; Tempo di esecuzione: ' + str(execution_time) +
+                   ' s (' + str(round(execution_time/60, 3)) + ' minutes) \n')
