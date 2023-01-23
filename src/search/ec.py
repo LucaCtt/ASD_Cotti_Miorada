@@ -3,17 +3,22 @@ import time
 
 
 class EC():
-    # Implementa direttamente lo pseucodice dell'algoritmo EC
     def __init__(self, A, time_limit):
         self.__A = A
         self.__rows, self.cols = A.shape
         self.__COV = []
         self.__B = np.zeros((self.__rows, self.__rows), dtype=int)
 
+        # Array di 0 per controllare se A[i] è vuota
         self.__zeros = np.zeros(self.cols, dtype=int)
+
+        # Array di 0 per controllare se A[i] è uguale a M
         self.__ones = np.ones(self.cols, dtype=int)
 
+        # Flag che indica se la ricerca deve essere interrotta
         self.__stop_flag = False
+
+
         self.__start_time = time.time()
         self.__time_limit = time_limit
 
