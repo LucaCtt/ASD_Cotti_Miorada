@@ -9,16 +9,16 @@ subparsers = parser.add_subparsers(help='sub-command help', dest='command')
 parser_search = subparsers.add_parser(
     'search', help='search help', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser_search.add_argument("-i", "--input", type=str,
-                           help="Input file.", default="in.txt")
+                           help="Input file.", default="test/in.txt")
 parser_search.add_argument("-o", "--output", type=str,
-                           help="Output file.", default="out.txt")
+                           help="Output file.", default="test/out.txt")
 parser_search.add_argument("-t", "--time", type=int,
                            help="Max execution time.", default=None)
 
 parser_gen = subparsers.add_parser(
     'gen', help='gen help',  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser_gen.add_argument("-o", "--output", type=str,
-                        help="Output file.", default="out.txt")
+                        help="Output file.", default="test/in.txt")
 parser_gen.add_argument("-m", "--mdim", type=int,
                         help="Number of elements in M.", default=10)
 parser_gen.add_argument("-n", "--ndim", type=int,
@@ -39,8 +39,7 @@ def search_cmd():
 
     ec.write_output(args.output, A, COV, visited_count, execution_time)
 
-    print(f'Tempo impiegato: {execution_time}\n')
-    print(f'File di output \"{args.output}\" creato\n')
+    print(f'Output file created at \"{args.output}\".')
 
 
 def gen_cmd():

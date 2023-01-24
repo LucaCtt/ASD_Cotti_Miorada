@@ -6,6 +6,8 @@ import time
 class EC:
     def __init__(self, A, time_limit):
         self.__A = A
+        self.__time_limit = time_limit
+
         self.__n, self.__m = A.shape
         self.__COV = []
         self.__B = np.zeros((self.__n, self.__n), dtype=int)
@@ -20,8 +22,6 @@ class EC:
         self.__stop_flag = False
 
         self.__start_time = time.time()
-        self.__time_limit = time_limit
-
         self.__visited_count = 0
 
     def start(self):
