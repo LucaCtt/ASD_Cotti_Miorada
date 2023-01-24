@@ -12,6 +12,11 @@ class Inst:
 
 
 def gen_inst(M, N, P):
+    # Esistono al più 2^M righe uniche,
+    # quindi se N >= 2^M non è possibile generare righe tutte diverse
+    if N >= 2**M:
+        raise ValueError('N must be less than 2^M')
+
     A = np.empty((N, M), dtype=int)
 
     for i in range(0, N):
@@ -24,7 +29,7 @@ def gen_inst(M, N, P):
         while not row.any() or not unique:
             row = np.random.binomial(1, P, M)
 
-            unique = True  
+            unique = True
             # Itera solo sulle righe già generate
             for element in A[0:i]:
                 if (row == element).all():
