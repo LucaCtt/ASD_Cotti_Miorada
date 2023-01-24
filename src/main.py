@@ -35,9 +35,9 @@ def search_cmd():
     alg = ec.EC(A, args.time)
     signal.signal(signal.SIGINT, alg.stop)
 
-    COV, execution_time = alg.start()
+    COV, visited_count, execution_time = alg.start()
 
-    ec.write_output(args.output, A, COV, execution_time)
+    ec.write_output(args.output, A, COV, visited_count, execution_time)
 
     print(f'Tempo impiegato: {execution_time}\n')
     print(f'File di output \"{args.output}\" creato\n')
