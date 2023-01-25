@@ -202,14 +202,16 @@ def write_output(
         file.write(f';;; Executed at: {datetime.today()}\n')
         file.write(
             f';;; Execution time: {execution_time}s ({round(execution_time/60, 3)} minutes) \n')
-        file.write(f';;; Nodes visited: {visited_count}\n\n')
+        file.write(f';;; Nodes visited: {visited_count}\n')
+        file.write(';;;\n')
 
         idx = 1
         for i in input_matrix:
             file.write(f';;; Set {idx}:\n{i}\n')
             idx += 1
 
-        file.write('\n;;; Exact Coverages:\n')
+        file.write(';;;\n')
+        file.write(';;; Exact Coverages:\n')
         if coverages == []:
             file.write(';;; No coverage found.\n')
         else:

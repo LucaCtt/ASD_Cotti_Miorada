@@ -70,6 +70,8 @@ def __gen_cmd():
     inst = gen_inst(args.mdim, args.ndim, args.prob)
     write_inst(args.output, inst)
 
+    print(f'Instance created at \"{args.output}\".')
+
 
 def __main():
     if args.command == 'search':
