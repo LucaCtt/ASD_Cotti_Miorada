@@ -1,3 +1,8 @@
+"""
+Module for the main program.
+Here you can find the main function and the functions for the subcommands.
+"""
+
 import argparse
 import signal
 from gen import gen_inst, write_inst
@@ -14,45 +19,64 @@ parser_search.add_argument("-o", "--output", type=str,
                            help="Output file.", default="test/out.txt")
 parser_search.add_argument("-t", "--time", type=int,
                            help="Max execution time.", default=None)
+parser_search.add_argument("-p", "--plus",
+                           type=int,
+                           help="Use EC plus instead of basic algorithm.",
+                           action=argparse.BooleanOptionalAction,
+                           default=False)
 
 parser_gen = subparsers.add_parser(
     'gen', help='gen help',  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser_gen.add_argument("-o", "--output", type=str,
-                        help="Output file.", default="test/in.txt")
-parser_gen.add_argument("-m", "--mdim", type=int,
-                        help="Number of elements in M.", default=10)
-parser_gen.add_argument("-n", "--ndim", type=int,
-                        help="Number of elements in N.", default=10)
-parser_gen.add_argument("-p", "--prob", type=float,
-                        help="Probability to generate a 1 in the binomial distribution.", default=0.5)
+parser_gen.add_argument("-o", "--output",
+                        type=str,
+                        help="Output file.",
+                        default="test/in.txt")
+parser_gen.add_argument("-m", "--mdim",
+                        type=int,
+                        help="Number of elements in M.",
+                        default=10)
+parser_gen.add_argument("-n", "--ndim",
+                        type=int,
+                        help="Number of elements in N.",
+                        default=10)
+parser_gen.add_argument("-p", "--prob",
+                        type=float,
+                        help="Probability to generate a 1 in the binomial distribution.",
+                        default=0.5)
 
 args = parser.parse_args()
 
 
-def search_cmd():
-    A = ec.read_input(args.input)
+def __search_cmd():
+    input_matrix = ec.read_input(args.input)
 
-    alg = ec.EC(A, args.time)
+    alg = None
+    if args.plus:
+        alg = ec.ECPlus(input_matrix, time_limit=args.time)
+    else:
+        alg = ec.EC(input_matrix, time_limit=args.time)
+
     signal.signal(signal.SIGINT, alg.stop)
 
-    COV, visited_count, execution_time = alg.start()
+    coverages, visited_count, execution_time = alg.start()
 
-    ec.write_output(args.output, A, COV, visited_count, execution_time)
+    ec.write_output(args.output, input_matrix, coverages,
+                    visited_count, execution_time)
 
     print(f'Output file created at \"{args.output}\".')
 
 
-def gen_cmd():
+def __gen_cmd():
     inst = gen_inst(args.mdim, args.ndim, args.prob)
     write_inst(args.output, inst)
 
 
-def main():
+def __main():
     if args.command == 'search':
-        search_cmd()
+        __search_cmd()
     elif args.command == 'gen':
-        gen_cmd()
+        __gen_cmd()
 
 
 if __name__ == "__main__":
-    main()
+    __main()

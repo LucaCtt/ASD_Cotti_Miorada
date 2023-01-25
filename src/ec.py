@@ -1,101 +1,173 @@
+""" Implementation of the EC and EC plus algorithms,
+    along with the functions to read and write the input and output files.
+"""
+
 from datetime import datetime
-import numpy as np
 import time
+import numpy as np
 
 
-class EC:
-    def __init__(self, A, time_limit):
-        self.__A = A
+class EC:  # pylint: disable=too-many-instance-attributes
+    """The basic EC algorithm.
+    """
+
+    def __init__(self, input_matrix: np.ndarray, time_limit: float):
+        self._input_matrix = input_matrix
+        self._n, self._m = input_matrix.shape
+        self._visited_count = 0
+        self._coverages = []
+        self._compat_matrix = np.zeros((self._n, self._n), dtype=int)
+
         self.__time_limit = time_limit
+        self.__start_time = time.time()
 
-        self.__n, self.__m = A.shape
-        self.__COV = []
-        self.__B = np.zeros((self.__n, self.__n), dtype=int)
+        # Array of 0 for checking if A[i] is equal to empty set
+        self.__zeros = np.zeros(self._m, dtype=int)
 
-        # Array di 0 per controllare se A[i] è vuota
-        self.__zeros = np.zeros(self.__m, dtype=int)
+        # Array of 1 for checking if A[i] is equal to M
+        # A[i] = M if A[i] contains all 1
+        self.__ones = np.ones(self._m, dtype=int)
 
-        # Array di 1 per controllare se A[i] è uguale a M
-        self.__ones = np.ones(self.__m, dtype=int)
-
-        # Flag che indica se la ricerca deve essere interrotta
+        # Flag for stopping the algorithm
         self.__stop_flag = False
 
-        self.__start_time = time.time()
-        self.__visited_count = 0
+
+    def stop(self):
+        """Stop the algorithm.
+        """
+        self.__stop_flag = True
 
     def start(self):
-        for i in range(0, self.__n):
-            if self.__should_stop():
+        """Avvia l'algoritmo.
+        """
+        for i in range(0, self._n):
+            if self._should_stop():
                 break
 
-            self.__visited_count += 1
+            self._visited_count += 1
 
-            if (self.__A[i] == self.__zeros).all():
+            if np.array_equal(self._input_matrix[i], self.__zeros):
                 continue
-            # Controllare che A[i] sia uguale a M
-            # coincide con il controllare che contenga tutti 1
-            elif (self.__A[i] == self.__ones).all():
-                self.__COV.append([i])
+
+            if np.array_equal(self._input_matrix[i], self.__ones):
+                self._coverages.append([i])
                 continue
 
             for j in range(0, i):
-                if self.__should_stop():
+                if self._should_stop():
                     break
 
-                self.__visited_count += 1
+                self._visited_count += 1
 
-                if np.bitwise_and(self.__A[j], self.__A[i]).any():
-                    self.__B[j, i] = 0
+                if np.bitwise_and(self._input_matrix[j], self._input_matrix[i]).any():
+                    self._compat_matrix[j, i] = 0
                 else:
-                    I = np.array([i, j])
-                    U = np.bitwise_or(self.__A[i], self.__A[j])
-                    if np.array_equal(U, self.__ones):
-                        self.__COV.append(I)
-                        self.__B[j, i] = 0
-                    else:
-                        self.__B[j, i] = 1
-                        Inter = np.bitwise_and(
-                            self.__B[0:j, i], self.__B[0:j, j])
-                        if Inter.size > 0 and not np.array_equal(Inter, np.zeros(len(Inter), dtype=int)):
-                            self.__esplora(I, U, Inter)
+                    self._verify_union(i, j)
 
         execution_time = time.time() - self.__start_time
-        return self.__COV, self.__visited_count, execution_time
+        return self._coverages, self._visited_count, execution_time
 
-    def stop(self):
-        self.__should_stop = True
+    def _verify_union(self, i, j):
+        indexes = np.array([i, j])
+        union = np.bitwise_or(self._input_matrix[i], self._input_matrix[j])
+        if np.array_equal(union, self.__ones):
+            self._coverages.append(indexes)
+            self._compat_matrix[j, i] = 0
+        else:
+            self._compat_matrix[j, i] = 1
+            inter = np.bitwise_and(
+                self._compat_matrix[0:j, i], self._compat_matrix[0:j, j])
+            if inter.size > 0 and not np.array_equal(inter, np.zeros(inter.size, dtype=int)):
+                self.__esplora(indexes, union, inter)
 
-    def __esplora(self, I, U, Inter):
-        for k in range(0, len(Inter)):
-            if self.__should_stop():
+    def __esplora(self, indexes, union, inter):
+        for k, _ in enumerate(inter):
+            if self._should_stop():
                 break
 
-            if Inter[k] == 1:
-                Itemp = np.append(I.copy(), k)
-                Utemp = np.bitwise_or(U, self.__A[k])
+            self._visited_count += 1
 
-                if np.array_equal(Utemp, self.__ones):
-                    self.__COV.append(Itemp)
+            if inter[k] == 1:
+                indexes_temp = np.append(indexes.copy(), k)
+                union_temp = np.bitwise_or(union, self._input_matrix[k])
+
+                if np.array_equal(union_temp, self.__ones):
+                    self._coverages.append(indexes_temp)
                 else:
-                    Intertemp = np.bitwise_and(Inter[0:k], self.__B[0:k, k])
-                    if Intertemp.size > 0 and not np.array_equal(Intertemp, np.zeros(len(Intertemp), dtype=int)):
-                        self.__esplora(Itemp, Utemp, Intertemp)
+                    inter_temp = np.bitwise_and(
+                        inter[0:k], self._compat_matrix[0:k, k])
+                    if inter_temp.size > 0 and not np.array_equal(inter_temp, np.zeros(inter_temp.size, dtype=int)):
+                        self.__esplora(indexes_temp, union_temp, inter_temp)
 
-    def __should_stop(self):
+    def _should_stop(self):
         if self.__stop_flag:
             return True
 
         if self.__time_limit is None:
             return False
 
-        return (time.time() - self.__start_time > self.__time_limit)
+        return time.time() - self.__start_time > self.__time_limit
 
 
-def read_input(input_file):
-    A = []
+class ECPlus(EC):
+    """Implementation of the EC plus algorithm.
+    """
 
-    with open(input_file, "r") as file:
+    def __init__(self, input_matrix: np.ndarray, time_limit: float):
+        super().__init__(input_matrix, time_limit)
+        self.__card = np.zeros(self._n, dtype=int)
+
+    def start(self):
+        for i in range(0, self._n):
+            self.__card[i] = np.count_nonzero(self._input_matrix[i])
+        return super().start()
+
+    def _verify_union(self, i, j):
+        indexes = np.array([i, j])
+        card_union = self.__card[i] + self.__card[j]
+        if card_union == self._m:
+            self._coverages.append(indexes)
+            self._compat_matrix[j, i] = 0
+        else:
+            self._compat_matrix[j, i] = 1
+            inter = np.bitwise_and(
+                self._compat_matrix[0:j, i], self._compat_matrix[0:j, j])
+            if inter.size > 0 and not np.array_equal(inter, np.zeros(len(inter), dtype=int)):
+                self.__esplora_plus(indexes, card_union, inter)
+
+    def __esplora_plus(self, indexes, card_union, inter):
+        for k, _ in enumerate(inter):
+            if self._should_stop():
+                break
+
+            self._visited_count += 1
+
+            if inter[k] == 1:
+                indexes_temp = np.append(indexes.copy(), k)
+                card_temp = card_union + self.__card[k]
+
+                if card_temp == self._m:
+                    self._coverages.append(indexes_temp)
+                else:
+                    inter_temp = np.bitwise_and(
+                        inter[0:k], self._compat_matrix[0:k, k])
+                    if inter_temp.size > 0 and not np.array_equal(inter_temp, np.zeros(inter_temp.size, dtype=int)):
+                        self.__esplora_plus(indexes_temp, card_temp, inter_temp)
+
+
+def read_input(input_file: str) -> np.ndarray:
+    """Reads an input matrix from a file.
+    Refer to the documentation for the format of the input file.
+
+    Args:
+        input_file (str): The path of the input file.
+
+    Returns:
+        np.ndarray: The input matrix read from the file.
+    """
+    input_matrix = []
+
+    with open(input_file, "r", encoding="utf-8") as file:
         for line in file:
             if ';;;' in line:
                 continue
@@ -104,13 +176,28 @@ def read_input(input_file):
                 elements = []
                 for element in line[0:-1]:
                     elements.append(int(element))
-                A.append(elements)
+                input_matrix.append(elements)
 
-    return np.array(A, dtype=int)
+    return np.array(input_matrix, dtype=int)
 
 
-def write_output(output_file, A, COV, visited_count, execution_time):
-    with open(output_file, "w") as file:
+def write_output(
+        output_file: str,
+        input_matrix: np.ndarray,
+        coverages: np.ndarray,
+        visited_count: int,
+        execution_time: float):
+    """Writes the output of the EC algorithm to a file.
+
+    Args:
+        output_file (str): The path of the output file.
+        input_matrix (np.ndarray): The input matrix.
+        coverages (np.ndarray): The exact coverages found by the EC algorithm.
+        visited_count (int): The number of nodes visited by the EC algorithm.
+        execution_time (float): The execution time of the algorithm.
+    """
+
+    with open(output_file, "w", encoding="utf-8") as file:
         file.write(';;; EC Algorithm \n')
         file.write(f';;; Executed at: {datetime.today()}\n')
         file.write(
@@ -118,14 +205,13 @@ def write_output(output_file, A, COV, visited_count, execution_time):
         file.write(f';;; Nodes visited: {visited_count}\n\n')
 
         idx = 1
-        for x in A:
-            file.write(f';;; Set {idx}:\n{x}\n')
+        for i in input_matrix:
+            file.write(f';;; Set {idx}:\n{i}\n')
             idx += 1
 
         file.write('\n;;; Exact Coverages:\n')
-        if COV == []:
+        if coverages == []:
             file.write(';;; No coverage found.\n')
         else:
-            for x in COV:
-                x = np.array(x, dtype=int)
-                file.write(f'{x+1}\n')
+            for c in coverages:
+                file.write(f'{c+1}\n')
