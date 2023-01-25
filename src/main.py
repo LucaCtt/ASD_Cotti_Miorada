@@ -6,6 +6,7 @@ Here you can find the main function and the functions for the subcommands.
 import argparse
 import signal
 from gen import gen_inst, write_inst
+from check import check_results
 import ec
 
 parser = argparse.ArgumentParser(prog="EC")
@@ -44,6 +45,11 @@ parser_gen.add_argument("-p", "--prob",
                         help="Probability to generate a 1 in the binomial distribution.",
                         default=0.5)
 
+parser_check = subparsers.add_parser(
+    'check', help='check help', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser_check.add_argument("-i", "--input", type=str, nargs="+",
+                          help="Input files.", default="test/in.txt")
+
 args = parser.parse_args()
 
 
@@ -58,10 +64,9 @@ def __search_cmd():
 
     signal.signal(signal.SIGINT, alg.stop)
 
-    coverages, visited_count, execution_time = alg.start()
+    result = alg.start()
 
-    ec.write_output(args.output, input_matrix, coverages,
-                    visited_count, execution_time)
+    ec.write_output(args.output, input_matrix, result)
 
     print(f'Output file created at \"{args.output}\".')
 
@@ -73,11 +78,25 @@ def __gen_cmd():
     print(f'Instance created at \"{args.output}\".')
 
 
+def __check_cmd():
+    results, min_exec_time, min_exec_idx = check_results(args.input)
+    equal = all(results[0] == res for res in results)
+
+    if not equal:
+        print('The results NOT are equal.')
+    else:
+        print('The results are equal.')
+        print(
+            f'Fastest was {args.input[min_exec_idx]} with execution time: {min_exec_time}')
+
+
 def __main():
     if args.command == 'search':
         __search_cmd()
     elif args.command == 'gen':
         __gen_cmd()
+    elif args.command == 'check':
+        __check_cmd()
 
 
 if __name__ == "__main__":

@@ -3,8 +3,21 @@
 """
 
 from datetime import datetime
+from dataclasses import dataclass
 import time
 import numpy as np
+
+
+@dataclass
+class ECResult:
+    """Represents the results of the EC algorithm."""
+    coverages: np.ndarray
+    visited_count: int
+    execution_time: float
+    stopped: bool = False
+
+    def __eq__(self, __o: object) -> bool:
+        return np.array_equal(self.coverages, __o.coverages) and self.visited_count == __o.visited_count
 
 
 class EC:  # pylint: disable=too-many-instance-attributes
@@ -31,13 +44,12 @@ class EC:  # pylint: disable=too-many-instance-attributes
         # Flag for stopping the algorithm
         self.__stop_flag = False
 
-
     def stop(self):
         """Stop the algorithm.
         """
         self.__stop_flag = True
 
-    def start(self):
+    def start(self) -> ECResult:
         """Avvia l'algoritmo.
         """
         for i in range(0, self._n):
@@ -65,7 +77,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
                     self._verify_union(i, j)
 
         execution_time = time.time() - self.__start_time
-        return self._coverages, self._visited_count, execution_time
+        return ECResult(self._coverages, self._visited_count, execution_time, self.__stop_flag)
 
     def _verify_union(self, i, j):
         indexes = np.array([i, j])
@@ -152,7 +164,8 @@ class ECPlus(EC):
                     inter_temp = np.bitwise_and(
                         inter[0:k], self._compat_matrix[0:k, k])
                     if inter_temp.size > 0 and not np.array_equal(inter_temp, np.zeros(inter_temp.size, dtype=int)):
-                        self.__esplora_plus(indexes_temp, card_temp, inter_temp)
+                        self.__esplora_plus(
+                            indexes_temp, card_temp, inter_temp)
 
 
 def read_input(input_file: str) -> np.ndarray:
@@ -181,12 +194,7 @@ def read_input(input_file: str) -> np.ndarray:
     return np.array(input_matrix, dtype=int)
 
 
-def write_output(
-        output_file: str,
-        input_matrix: np.ndarray,
-        coverages: np.ndarray,
-        visited_count: int,
-        execution_time: float):
+def write_output(output_file: str, input_matrix: np.ndarray, result: ECResult):
     """Writes the output of the EC algorithm to a file.
 
     Args:
@@ -201,8 +209,9 @@ def write_output(
         file.write(';;; EC Algorithm \n')
         file.write(f';;; Executed at: {datetime.today()}\n')
         file.write(
-            f';;; Execution time: {execution_time}s ({round(execution_time/60, 3)} minutes) \n')
-        file.write(f';;; Nodes visited: {visited_count}\n')
+            f';;; Execution time: {result.execution_time}s ({round(result.execution_time/60, 3)} minutes) \n')
+        file.write(f';;; Stopped: {result.stopped}\n')
+        file.write(f';;; Nodes visited: {result.visited_count}\n')
         file.write(';;;\n')
 
         idx = 1
@@ -212,8 +221,8 @@ def write_output(
 
         file.write(';;;\n')
         file.write(';;; Exact Coverages:\n')
-        if coverages == []:
+        if result.coverages == []:
             file.write(';;; No coverage found.\n')
         else:
-            for c in coverages:
+            for c in result.coverages:
                 file.write(f'{c+1}\n')
