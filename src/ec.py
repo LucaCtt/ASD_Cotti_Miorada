@@ -1,5 +1,6 @@
-""" Implementation of the EC and EC plus algorithms,
-    along with the functions to read and write the input and output files.
+""" ec.py
+Implementation of the EC and EC plus algorithms,
+along with the functions to read and write the input and output files.
 """
 
 from datetime import datetime
@@ -15,6 +16,7 @@ class ECResult:
     visited_count: int
     execution_time: float
     stopped: bool = False
+    plus: bool = False
 
     def __eq__(self, __o: object) -> bool:
         return np.array_equal(self.coverages, __o.coverages) and self.visited_count == __o.visited_count
@@ -77,7 +79,10 @@ class EC:  # pylint: disable=too-many-instance-attributes
                     self._verify_union(i, j)
 
         execution_time = time.time() - self.__start_time
-        return ECResult(self._coverages, self._visited_count, execution_time, self.__stop_flag)
+        return ECResult(coverages=self._coverages,
+                        visited_count=self._visited_count,
+                        execution_time=execution_time,
+                        stopped=self.__stop_flag)
 
     def _verify_union(self, i, j):
         indexes = np.array([i, j])
@@ -132,7 +137,10 @@ class ECPlus(EC):
     def start(self):
         for i in range(0, self._n):
             self.__card[i] = np.count_nonzero(self._input_matrix[i])
-        return super().start()
+
+        result = super().start()
+        result.plus = True
+        return result
 
     def _verify_union(self, i, j):
         indexes = np.array([i, j])
@@ -204,19 +212,23 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: ECResult):
         visited_count (int): The number of nodes visited by the EC algorithm.
         execution_time (float): The execution time of the algorithm.
     """
+    total_nodes = 2 ** input_matrix.shape[0]
+    perc_visited = round(result.visited_count / total_nodes * 100, 4)
 
     with open(output_file, "w", encoding="utf-8") as file:
-        file.write(';;; EC Algorithm \n')
+        file.write(f';;; EC Algorithm ({"Plus version" if result.plus else "Base version"})\n')
         file.write(f';;; Executed at: {datetime.today()}\n')
         file.write(
             f';;; Execution time: {result.execution_time}s ({round(result.execution_time/60, 3)} minutes) \n')
         file.write(f';;; Stopped: {result.stopped}\n')
         file.write(f';;; Nodes visited: {result.visited_count}\n')
+        file.write(f';;; Total nodes: {total_nodes}\n')
+        file.write(f';;; Percentage of nodes visited: {perc_visited}%\n')
         file.write(';;;\n')
 
         idx = 1
         for i in input_matrix:
-            file.write(f';;; Set {idx}:\n{i}\n')
+            file.write(f';;; Set {idx:>3}: {i}\n')
             idx += 1
 
         file.write(';;;\n')

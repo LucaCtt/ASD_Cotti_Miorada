@@ -1,5 +1,7 @@
-"""
-Module for the main program.
+#!/usr/bin/env python3
+
+"""main.py: Module for the main program.
+
 Here you can find the main function and the functions for the subcommands.
 """
 
@@ -9,48 +11,37 @@ from gen import gen_inst, write_inst
 from check import check_results
 import ec
 
-parser = argparse.ArgumentParser(prog="EC")
-subparsers = parser.add_subparsers(help='sub-command help', dest='command')
+p = argparse.ArgumentParser(prog="EC")
+subp = p.add_subparsers(help='sub-command help', dest='command')
 
-parser_search = subparsers.add_parser(
-    'search', help='search help', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser_search.add_argument("-i", "--input", type=str,
-                           help="Input file.", default="test/in.txt")
-parser_search.add_argument("-o", "--output", type=str,
-                           help="Output file.", default="test/out.txt")
-parser_search.add_argument("-t", "--time", type=int,
-                           help="Max execution time.", default=None)
-parser_search.add_argument("-p", "--plus",
-                           type=int,
-                           help="Use EC plus instead of basic algorithm.",
-                           action=argparse.BooleanOptionalAction,
-                           default=False)
+p_search = subp.add_parser('search', help='search help',
+                           formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+p_search.add_argument("-i", "--input", type=str,
+                      help="Input file.", default="test/in.txt")
+p_search.add_argument("-o", "--output", type=str,
+                      help="Output file.", default="test/out.txt")
+p_search.add_argument("-t", "--time", type=int,
+                      help="Max execution time.", default=None)
+p_search.add_argument("-p", "--plus", type=int, help="Use EC plus instead of basic algorithm.",
+                      action=argparse.BooleanOptionalAction, default=False)
 
-parser_gen = subparsers.add_parser(
-    'gen', help='gen help',  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser_gen.add_argument("-o", "--output",
-                        type=str,
-                        help="Output file.",
-                        default="test/in.txt")
-parser_gen.add_argument("-m", "--mdim",
-                        type=int,
-                        help="Number of elements in M.",
-                        default=10)
-parser_gen.add_argument("-n", "--ndim",
-                        type=int,
-                        help="Number of elements in N.",
-                        default=10)
-parser_gen.add_argument("-p", "--prob",
-                        type=float,
-                        help="Probability to generate a 1 in the binomial distribution.",
-                        default=0.5)
+p_gen = subp.add_parser('gen', help='gen help',
+                        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+p_gen.add_argument("-o", "--output", type=str,
+                   help="Output file.", default="test/in.txt")
+p_gen.add_argument("-m", "--mdim", type=int,
+                   help="Number of elements in M.", default=10)
+p_gen.add_argument("-n", "--ndim", type=int,
+                   help="Number of elements in N.", default=10)
+p_gen.add_argument("-p", "--prob", type=float,
+                   help="Probability to generate a 1 in the binomial distribution.", default=0.5)
 
-parser_check = subparsers.add_parser(
-    'check', help='check help', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser_check.add_argument("-i", "--input", type=str, nargs="+",
-                          help="Input files.", default="test/in.txt")
+p_check = subp.add_parser('check', help='check help',
+                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+p_check.add_argument("-i", "--input", type=str, nargs="+",
+                     help="Input files.", default="test/in.txt")
 
-args = parser.parse_args()
+args = p.parse_args()
 
 
 def __search_cmd():
@@ -79,10 +70,9 @@ def __gen_cmd():
 
 
 def __check_cmd():
-    results, min_exec_time, min_exec_idx = check_results(args.input)
-    equal = all(results[0] == res for res in results)
+    all_equal, min_exec_time, min_exec_idx = check_results(args.input)
 
-    if not equal:
+    if not all_equal:
         print('The results NOT are equal.')
     else:
         print('The results are equal.')
