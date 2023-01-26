@@ -6,8 +6,10 @@ import numpy as np
 from ec import ECResult
 
 
-def check_results(input_files: list) -> list:
-    """Checks that the EC results in the input files are the same.
+def compare_results(input_files: list) -> list:
+    """Compares the EC results in the input files.
+    Will return an error if the results are not equal, ie
+    they refer to different problems.
 
     Args:
         input_files (list): The file containing the results to compare.
