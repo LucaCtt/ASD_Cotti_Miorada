@@ -15,13 +15,14 @@ class Inst:
     gen_at: datetime = datetime.today()
 
 
-def gen_inst(card_m: int, card_n: int, prob: float) -> Inst:
+def gen_inst(card_m: int, card_n: int, prob: float, guarantee_sol: bool) -> Inst:
     """Generates an instance of the EC problem.
 
     Args:
         card_m (int): The cardinality of set M.
         card_n (int): The cardinality of set N.
         prob (float): The probability of a bit to be 1.
+        guarantee_sol (bool): True if the instance must have at least one solution.
 
     Raises:
         ValueError: _description_
@@ -30,25 +31,33 @@ def gen_inst(card_m: int, card_n: int, prob: float) -> Inst:
         Inst: _description_
     """
 
-    # Esistono al più 2^M righe uniche,
-    # quindi se N >= 2^M non è possibile generare righe tutte diverse
+    # There are at most 2^M unique rows,
+    # so if N >= 2^M it is not possible to generate all different rows
     if card_n >= 2**card_m:
         raise ValueError('N must be less than 2^M')
 
     input_matrix = np.empty((card_n, card_m), dtype=int)
 
-    for i in range(0, card_n):
+    # Where to start the random generation.
+    # If a solution must be guaranteed the first m rows
+    # will contain an identity matrix,
+    # so generation will start from the m+1 row
+    start_index = 0
+    if guarantee_sol:
+        start_index = card_m
+        input_matrix[0:card_m] = np.eye(card_m, dtype=int)
+
+    for i in range(start_index, card_n):
         row = np.zeros(card_m, dtype=int)
         unique = False
 
-        # Genera una riga casuale finchè non è sia non vuota
-        # (almeno un elemento diverso da zero)
-        # sia unica rispetto alle righe già generate
+        # Generates a random row until it is not empty
+        # and also unique with respect to the already generated rows.
         while not row.any() or not unique:
             row = np.random.binomial(1, prob, card_m)
 
             unique = True
-            # Itera solo sulle righe già generate
+            # Iterate only on the already generated rows
             for element in input_matrix[0:i]:
                 if (row == element).all():
                     unique = False
@@ -68,8 +77,10 @@ def write_inst(output_file: str, inst: Inst):
 
     with open(output_file, 'w', encoding="utf-8") as file:
         file.write(f';;; Generated at: {inst.gen_at}\n')
-        file.write(f';;; Cardinality of M: {str(inst.input_matrix.shape[1])}\n')
-        file.write(f';;; Cardinality of N: {str(inst.input_matrix.shape[0])}\n')
+        file.write(
+            f';;; Cardinality of M: {str(inst.input_matrix.shape[1])}\n')
+        file.write(
+            f';;; Cardinality of N: {str(inst.input_matrix.shape[0])}\n')
         file.write(f';;; Probability: {str(inst.prob)}')
 
         for row in inst.input_matrix:
