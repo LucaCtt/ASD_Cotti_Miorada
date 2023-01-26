@@ -13,13 +13,14 @@ import numpy as np
 class ECResult:
     """Represents the results of the EC algorithm."""
     coverages: np.ndarray
-    visited_count: int
+    visited_nodes: int
+    total_nodes: int
     execution_time: float
     stopped: bool = False
     plus: bool = False
 
     def __eq__(self, __o: object) -> bool:
-        return np.array_equal(self.coverages, __o.coverages) and self.visited_count == __o.visited_count
+        return np.array_equal(self.coverages, __o.coverages) and self.visited_nodes == __o.visited_count
 
 
 class EC:  # pylint: disable=too-many-instance-attributes
@@ -29,7 +30,8 @@ class EC:  # pylint: disable=too-many-instance-attributes
     def __init__(self, input_matrix: np.ndarray, time_limit: float):
         self._input_matrix = input_matrix
         self._n, self._m = input_matrix.shape
-        self._visited_count = 0
+        self._visited_nodes = 0
+        self._total_nodes = (2**self._n)-1
         self._coverages = []
         self._compat_matrix = np.zeros((self._n, self._n), dtype=int)
 
@@ -52,13 +54,13 @@ class EC:  # pylint: disable=too-many-instance-attributes
         self.__stop_flag = True
 
     def start(self) -> ECResult:
-        """Avvia l'algoritmo.
+        """Start the algorithm.
         """
-        for i in range(0, self._n):
+        for i in range(self._n):
             if self._should_stop():
                 break
 
-            self._visited_count += 1
+            self._visited_nodes += 1
 
             if np.array_equal(self._input_matrix[i], self.__zeros):
                 continue
@@ -67,11 +69,11 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 self._coverages.append([i])
                 continue
 
-            for j in range(0, i):
+            for j in range(i):
                 if self._should_stop():
                     break
 
-                self._visited_count += 1
+                self._visited_nodes += 1
 
                 if np.bitwise_and(self._input_matrix[j], self._input_matrix[i]).any():
                     self._compat_matrix[j, i] = 0
@@ -80,7 +82,8 @@ class EC:  # pylint: disable=too-many-instance-attributes
 
         execution_time = time.time() - self.__start_time
         return ECResult(coverages=self._coverages,
-                        visited_count=self._visited_count,
+                        visited_nodes=self._visited_nodes,
+                        total_nodes=self._total_nodes,
                         execution_time=execution_time,
                         stopped=self.__stop_flag)
 
@@ -102,7 +105,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
             if self._should_stop():
                 break
 
-            self._visited_count += 1
+            self._visited_nodes += 1
 
             if inter[k] == 1:
                 indexes_temp = np.append(indexes.copy(), k)
@@ -152,7 +155,7 @@ class ECPlus(EC):
             self._compat_matrix[j, i] = 1
             inter = np.bitwise_and(
                 self._compat_matrix[0:j, i], self._compat_matrix[0:j, j])
-            if inter.size > 0 and not np.array_equal(inter, np.zeros(len(inter), dtype=int)):
+            if inter.size > 0 and not np.array_equal(inter, np.zeros(inter.size, dtype=int)):
                 self.__esplora_plus(indexes, card_union, inter)
 
     def __esplora_plus(self, indexes, card_union, inter):
@@ -160,7 +163,7 @@ class ECPlus(EC):
             if self._should_stop():
                 break
 
-            self._visited_count += 1
+            self._visited_nodes += 1
 
             if inter[k] == 1:
                 indexes_temp = np.append(indexes.copy(), k)
@@ -212,17 +215,17 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: ECResult):
         visited_count (int): The number of nodes visited by the EC algorithm.
         execution_time (float): The execution time of the algorithm.
     """
-    total_nodes = 2 ** input_matrix.shape[0]
-    perc_visited = round(result.visited_count / total_nodes * 100, 4)
+    perc_visited = round(result.visited_nodes / result.total_nodes * 100, 4)
 
     with open(output_file, "w", encoding="utf-8") as file:
-        file.write(f';;; EC Algorithm ({"Plus version" if result.plus else "Base version"})\n')
+        file.write(
+            f';;; EC Algorithm ({"Plus version" if result.plus else "Base version"})\n')
         file.write(f';;; Executed at: {datetime.today()}\n')
         file.write(
             f';;; Execution time: {result.execution_time}s ({round(result.execution_time/60, 3)} minutes) \n')
         file.write(f';;; Stopped: {result.stopped}\n')
-        file.write(f';;; Nodes visited: {result.visited_count}\n')
-        file.write(f';;; Total nodes: {total_nodes}\n')
+        file.write(f';;; Nodes visited: {result.visited_nodes}\n')
+        file.write(f';;; Total nodes: {result.total_nodes}\n')
         file.write(f';;; Percentage of nodes visited: {perc_visited}%\n')
         file.write(';;;\n')
 
