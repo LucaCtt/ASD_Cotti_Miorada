@@ -17,6 +17,7 @@ class ECResult:
     total_nodes: int
     execution_time: float
     stopped: bool = False
+    time_limit_reached: bool = False
     plus: bool = False
 
     def __eq__(self, __o: object) -> bool:
@@ -85,7 +86,9 @@ class EC:  # pylint: disable=too-many-instance-attributes
                         visited_nodes=self._visited_nodes,
                         total_nodes=self._total_nodes,
                         execution_time=execution_time,
-                        stopped=self.__stop_flag)
+                        stopped=self.__stop_flag,
+                        time_limit_reached=self.__time_limit_reached()
+                        )
 
     def _verify_union(self, i, j):
         indexes = np.array([i, j])
@@ -119,14 +122,17 @@ class EC:  # pylint: disable=too-many-instance-attributes
                     if inter_temp.size > 0 and not np.array_equal(inter_temp, np.zeros(inter_temp.size, dtype=int)):
                         self.__esplora(indexes_temp, union_temp, inter_temp)
 
-    def _should_stop(self):
-        if self.__stop_flag:
-            return True
-
+    def __time_limit_reached(self) -> bool:
         if self.__time_limit is None:
             return False
 
         return time.time() - self.__start_time > self.__time_limit
+
+    def _should_stop(self) -> bool:
+        if self.__stop_flag:
+            return True
+
+        return self.__time_limit_reached()
 
 
 class ECPlus(EC):
@@ -224,6 +230,7 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: ECResult):
         file.write(
             f';;; Execution time: {result.execution_time}s ({round(result.execution_time/60, 3)} minutes) \n')
         file.write(f';;; Stopped: {result.stopped}\n')
+        file.write(f';;; Time limit reached: {result.time_limit_reached}\n')
         file.write(f';;; Nodes visited: {result.visited_nodes}\n')
         file.write(f';;; Total nodes: {result.total_nodes}\n')
         file.write(f';;; Percentage of nodes visited: {perc_visited}%\n')
@@ -239,5 +246,5 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: ECResult):
         if result.coverages == []:
             file.write(';;; No coverage found.\n')
         else:
-            for c in result.coverages:
-                file.write(f'{c+1}\n')
+            for coverage in result.coverages:
+                file.write(f'{coverage+1}\n')
