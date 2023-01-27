@@ -21,7 +21,7 @@ def __search_cmd():
     else:
         alg = ec.EC(input_matrix, time_limit=args.time)
 
-    signal.signal(signal.SIGINT, alg.stop)
+    signal.signal(signal.SIGINT, lambda *_: alg.stop())
 
     result = alg.start()
 
