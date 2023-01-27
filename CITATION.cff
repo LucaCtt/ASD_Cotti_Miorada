@@ -1,0 +1,18 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: ASD_Cotti_miorada
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Luca
+    family-names: Cotti
+    email: l.cotti001@studenti.unibs.it
+  - given-names: Stefano
+    family-names: Miorada
+    email: s.miorada@studenti.unibs.it
+repository-code: 'https://github.com/LucaCtt/ASD_Cotti_Miorada'
+license: MIT
