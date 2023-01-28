@@ -28,7 +28,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
     """The basic EC algorithm.
     """
 
-    def __init__(self, input_matrix: np.ndarray, time_limit: float):
+    def __init__(self, input_matrix: np.ndarray, time_limit: float = None):
         self._input_matrix = input_matrix
         self._n, self._m = input_matrix.shape
         self._visited_nodes = 0
@@ -139,7 +139,7 @@ class ECPlus(EC):
     """Implementation of the EC plus algorithm.
     """
 
-    def __init__(self, input_matrix: np.ndarray, time_limit: float):
+    def __init__(self, input_matrix: np.ndarray, time_limit: float = None): 
         super().__init__(input_matrix, time_limit)
         self.__card = np.zeros(self._n, dtype=int)
 

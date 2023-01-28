@@ -7,17 +7,25 @@ import argparse
 __parser = argparse.ArgumentParser(prog="EC")
 __subp = __parser.add_subparsers(help='sub-command help', dest='command')
 
-# Parser for the search subcommand
-__p_search = __subp.add_parser('ec', help='ec help',
+# Parser for the ec subcommand
+__p_ec = __subp.add_parser('ec', help='ec help',
                                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-__p_search.add_argument("-i", "--input", type=str,
+__p_ec.add_argument("-i", "--input", type=str,
                         help="Input file.", default="test/in.txt")
-__p_search.add_argument("-o", "--output", type=str,
+__p_ec.add_argument("-o", "--output", type=str,
                         help="Output file.", default="test/out.txt")
-__p_search.add_argument("-t", "--time", type=int,
+__p_ec.add_argument("-t", "--time", type=int,
                         help="Max execution time.", default=None)
-__p_search.add_argument("-p", "--plus", type=bool, help="Use EC plus instead of basic algorithm.",
+__p_ec.add_argument("-p", "--plus", type=bool, help="Use EC plus instead of basic algorithm.",
                         action=argparse.BooleanOptionalAction, default=False)
+
+# Parser for the dlx subcommand
+__p_dlx = __subp.add_parser('dlx', help='dlx help',
+                               formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+__p_dlx.add_argument("-i", "--input", type=str,
+                        help="Input file.", default="test/in.txt")
+__p_dlx.add_argument("-o", "--output", type=str,
+                        help="Output file.", default="test/out.txt")
 
 # Parser for the gen subcommand
 __p_gen = __subp.add_parser('gen', help='gen help',
