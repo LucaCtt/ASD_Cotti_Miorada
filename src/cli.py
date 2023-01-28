@@ -8,7 +8,7 @@ __parser = argparse.ArgumentParser(prog="EC")
 __subp = __parser.add_subparsers(help='sub-command help', dest='command')
 
 # Parser for the search subcommand
-__p_search = __subp.add_parser('search', help='search help',
+__p_search = __subp.add_parser('ec', help='ec help',
                                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 __p_search.add_argument("-i", "--input", type=str,
                         help="Input file.", default="test/in.txt")
@@ -37,7 +37,7 @@ __p_gen.add_argument("-g", "--guarantee", type=bool, help="Guarantee at least on
 __p_check = __subp.add_parser('compare', help='compare help',
                               formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 __p_check.add_argument("-i", "--input", type=str, nargs="+",
-                       help="Input files.", default="test/in.txt")
+                       help="Input files.")
 
 
 def get_args() -> argparse.Namespace:

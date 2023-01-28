@@ -12,7 +12,7 @@ import cli
 
 args = cli.get_args()
 
-def __search_cmd():
+def __ec_cmd():
     input_matrix = ec.read_input(args.input)
 
     alg = None
@@ -49,8 +49,8 @@ def __compare_cmd():
 
 
 def __main():
-    if args.command == 'search':
-        __search_cmd()
+    if args.command == 'ec':
+        __ec_cmd()
     elif args.command == 'gen':
         __gen_cmd()
     elif args.command == 'compare':
