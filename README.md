@@ -3,6 +3,9 @@
 Progetto per il corso di Algoritmi e Strutture Dati della laurea magistrale
 in Ingegneria Informatica presso l'Università degli Studi di Brescia.
 
+In questo documento sono riportate le istruzioni per l'avvio dell'applicazione.
+Per informazioni dettagliate sulle scelte progettuali, si rimanda alla relazione.
+
 - [Progetto di Algoritmi e Strutture Dati AA 2021/2022](#progetto-di-algoritmi-e-strutture-dati-aa-20212022)
   - [Struttura del progetto](#struttura-del-progetto)
   - [Requisiti](#requisiti)
@@ -53,7 +56,7 @@ nella cartella `src`, che supporta i seguenti sotto-comandi:
 
 - `gen`: genera istanze di test;
 - `ec`: esegue l'algoritmo EC;
-- `compare`: confronta risultati dell'algoritmo EC;
+- `compare`: confronta risultati dell'algoritmo EC.
 
 Sia sul comando principale che sui sotto-comandi è possibile utilizzare
 l'opzione `-h` (o `--help`) per ottenere una descrizione delle opzioni disponibili.
@@ -70,16 +73,16 @@ Per generare istanze di test è possibile utilizzare il comando `gen`.
 
 Le opzioni disponibili sono:
 - `-o`, `--output`: file su cui salvare l'istanza generata (default: `test/in.txt`);
-- `-m`, `--mdim`: cardinalità dell'insieme M (default: 10);
-- `-n`, `--ndim`: cardinalità dell'insieme N (default: 10);
-- `-p`, `--prob`: probabilità di generaee 1 nella distribuzione binomiale (default: 0.5);
-- `-g`, `--guarantee`: se deve essere garantita almeno una soluzione all'istanza generata (default: No).
+- `-m`, `--mdim`: cardinalità dell'insieme M (default: `10`);
+- `-n`, `--ndim`: cardinalità dell'insieme N (default: `10`);
+- `-p`, `--prob`: probabilità di generaee 1 nella distribuzione binomiale (default: `0.5`);
+- `-g`, `--guarantee`: se deve essere garantita almeno una soluzione all'istanza generata (default: `False`).
 
-Per esempio, per generare un'istanza di test con 100 elementi in M, 100 elementi in N,
-probabilità di 1 pari a 0.5 e con garanzia di soluzione:
+Per esempio, per generare un'istanza di test con `100` elementi in M, `100` elementi in N,
+probabilità di 1 pari a `0.5` e senza garanzia di soluzione:
 
 ```bash
-python src/main.py gen -o test/100x100x05.txt -m 100 -n 100 -p 0.5 -g
+python src/main.py gen -o test/100x100x05.txt -m 100 -n 100 -p 0.5
 ```
 
 ### Esecuzione dell'algoritmo EC
@@ -89,8 +92,8 @@ Il comando `ec` esegue l'algoritmo EC (o EC+).
 Le opzioni supportate sono:
 - `-i`, `--input`: file da cui leggere l'istanza (default: `test/in.txt`);
 - `-o`, `--output`: file su cui salvare il risultato dell'algoritmo (default: `test/out.txt`);
-- `-p`, `--plus`: se deve essere eseguito l'algoritmo EC+ (default: No).
-- `-t`, `--time`: tempo massimo di esecuzione dell'algoritmo in secondi.
+- `-p`, `--plus`: se deve essere eseguito l'algoritmo EC+ (default: `False`);
+- `-t`, `--time`: tempo massimo di esecuzione dell'algoritmo in secondi (opzionale).
 
 Il seguente comando esegue l'algoritmo EC+ sull'istanza di test `test/100x100x0.5.txt`,
 salvando il risultato in `test/out.txt` e senza limitare il tempo di esecuzione:
@@ -112,9 +115,9 @@ verificando che siano innanzitutto uguali (ovvero che abbiano lo stesso set COV 
 Se questo è vero per ognuno dei risultati, viene indicato il risultato migliore.
 
 Opzioni disponibili:
-- `-i`, `--input`: lista di file da cui leggere i risultati;
+- `-i`, `--input`: lista di file da cui leggere i risultati.
 
-Per esempio, per confrontare i risultati dell'algoritmo EC+ e EC sull'istanza di test `test/100x100x0.5.txt`:
+Per esempio, per confrontare i risultati dell'algoritmo EC+ e EC:
 
 ```bash
 python src/main.py compare -i test/out.txt test/out_plus.txt
