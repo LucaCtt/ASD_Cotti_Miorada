@@ -3,7 +3,7 @@ Utility functions to check the outputs of EC and EC plus algorithms.
 """
 
 import numpy as np
-from ec import ECResult
+from ec import Result
 
 
 def compare_results(input_files: list) -> list:
@@ -40,7 +40,7 @@ def compare_results(input_files: list) -> list:
     return all_equal, min_exec_time, min_idx
 
 
-def read_result(file_name: str) -> ECResult:
+def read_result(file_name: str) -> Result:
     """Reads the search result from a file.
 
     Args:
@@ -78,4 +78,4 @@ def read_result(file_name: str) -> ECResult:
                 # so we can just stop iterating.
                 break
 
-    return ECResult(np.asarray(coverages, dtype=object), visited_count, execution_time, stopped)
+    return Result(np.asarray(coverages, dtype=object), visited_count, execution_time, stopped)

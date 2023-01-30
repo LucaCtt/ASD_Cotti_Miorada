@@ -3,8 +3,10 @@
 Progetto per il corso di Algoritmi e Strutture Dati della laurea magistrale
 in Ingegneria Informatica presso l'Università degli Studi di Brescia.
 
-In questo documento sono riportate le istruzioni per l'avvio dell'applicazione.
-Per informazioni dettagliate sulle scelte progettuali, si rimanda alla relazione.
+In questo documento sono riportate esclusivamente le istruzioni per l'avvio dell'applicazione.
+Le scelte progettuali sono documentate nella relazione.
+I test per verificare la performance dell'implementazione si trovano in
+[questo notebook su Google Colab](https://colab.research.google.com/drive/1EhVerQB7eSn5XzcdeW06sb2c1d9Vlafc?usp=sharing).
 
 - [Progetto di Algoritmi e Strutture Dati AA 2021/2022](#progetto-di-algoritmi-e-strutture-dati-aa-20212022)
   - [Struttura del progetto](#struttura-del-progetto)

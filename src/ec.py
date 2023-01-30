@@ -10,7 +10,7 @@ import numpy as np
 
 
 @dataclass
-class ECResult:
+class Result:
     """Represents the results of the EC algorithm."""
     coverages: np.ndarray
     visited_nodes: int
@@ -21,7 +21,9 @@ class ECResult:
     plus: bool = False
 
     def __eq__(self, __o: object) -> bool:
-        return np.array_equal(self.coverages, __o.coverages) and self.visited_nodes == __o.visited_count
+        return np.array_equal(self.coverages, __o.coverages)\
+            and self.visited_nodes == __o.visited_nodes\
+            and self.total_nodes == __o.total_nodes
 
 
 class EC:  # pylint: disable=too-many-instance-attributes
@@ -37,16 +39,19 @@ class EC:  # pylint: disable=too-many-instance-attributes
         self._compat_matrix = np.zeros((self._n, self._n), dtype=int)
 
         self.__time_limit = time_limit
-        self.__start_time = time.time()
 
-        # Array of 0 for checking if A[i] is equal to empty set
+        # process_time() is used instead of time() because it is more precise,
+        # as it measures the time spent by the process in the CPU.
+        self.__start_time = time.process_time()
+
+        # Array of 0 for checking if A[i] is equal to empty set.
         self.__zeros = np.zeros(self._m, dtype=int)
 
-        # Array of 1 for checking if A[i] is equal to M
-        # A[i] = M if A[i] contains all 1
+        # Array of 1 for checking if A[i] is equal to M.
+        # A[i] = M if A[i] contains all 1.
         self.__ones = np.ones(self._m, dtype=int)
 
-        # Flag for stopping the algorithm
+        # Flag for stopping the algorithm.
         self.__stop_flag = False
 
     def stop(self):
@@ -54,7 +59,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
         """
         self.__stop_flag = True
 
-    def start(self) -> ECResult:
+    def start(self) -> Result:
         """Start the algorithm.
         """
         for i in range(self._n):
@@ -81,14 +86,14 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 else:
                     self._verify_union(i, j)
 
-        execution_time = time.time() - self.__start_time
-        return ECResult(coverages=self._coverages,
-                        visited_nodes=self._visited_nodes,
-                        total_nodes=self._total_nodes,
-                        execution_time=execution_time,
-                        stopped=self.__stop_flag,
-                        time_limit_reached=self.__time_limit_reached()
-                        )
+        execution_time = time.process_time() - self.__start_time
+        return Result(coverages=self._coverages,
+                      visited_nodes=self._visited_nodes,
+                      total_nodes=self._total_nodes,
+                      execution_time=execution_time,
+                      stopped=self.__stop_flag,
+                      time_limit_reached=self.__time_limit_reached()
+                      )
 
     def _verify_union(self, i, j):
         indexes = np.array([i, j])
@@ -139,7 +144,7 @@ class ECPlus(EC):
     """Implementation of the EC plus algorithm.
     """
 
-    def __init__(self, input_matrix: np.ndarray, time_limit: float = None): 
+    def __init__(self, input_matrix: np.ndarray, time_limit: float = None):
         super().__init__(input_matrix, time_limit)
         self.__card = np.zeros(self._n, dtype=int)
 
@@ -211,7 +216,7 @@ def read_input(input_file: str) -> np.ndarray:
     return np.array(input_matrix, dtype=int)
 
 
-def write_output(output_file: str, input_matrix: np.ndarray, result: ECResult):
+def write_output(output_file: str, input_matrix: np.ndarray, result: Result):
     """Writes the output of the EC algorithm to a file.
 
     Args:
@@ -224,11 +229,13 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: ECResult):
     perc_visited = round(result.visited_nodes / result.total_nodes * 100, 4)
 
     with open(output_file, "w", encoding="utf-8") as file:
+        exec_time_minutes = round(result.execution_time / 60, 3)
+
         file.write(
             f';;; EC Algorithm ({"Plus version" if result.plus else "Base version"})\n')
         file.write(f';;; Executed at: {datetime.today()}\n')
         file.write(
-            f';;; Execution time: {result.execution_time}s ({round(result.execution_time/60, 3)} minutes) \n')
+            f';;; Execution time: {result.execution_time}s ({exec_time_minutes} minutes) \n')
         file.write(f';;; Stopped: {result.stopped}\n')
         file.write(f';;; Time limit reached: {result.time_limit_reached}\n')
         file.write(f';;; Nodes visited: {result.visited_nodes}\n')

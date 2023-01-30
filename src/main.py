@@ -5,8 +5,8 @@ Main function and the functions for the subcommands.
 """
 
 import signal
-from gen import gen_inst, write_inst
-from compare import compare_results
+import gen
+import compare
 import ec
 import cli
 
@@ -24,21 +24,20 @@ def __ec_cmd():
     signal.signal(signal.SIGINT, lambda *_: alg.stop())
 
     result = alg.start()
-
     ec.write_output(args.output, input_matrix, result)
 
     print(f'Output file created at \"{args.output}\".')
 
 
 def __gen_cmd():
-    inst = gen_inst(args.mdim, args.ndim, args.prob, args.guarantee)
-    write_inst(args.output, inst)
+    inst = gen.gen_inst(args.mdim, args.ndim, args.prob, args.guarantee)
+    gen.write_inst(args.output, inst)
 
     print(f'Instance created at \"{args.output}\".')
 
 
 def __compare_cmd():
-    all_equal, min_exec_time, min_exec_idx = compare_results(args.input)
+    all_equal, min_exec_time, min_exec_idx = compare.compare_results(args.input)
 
     if not all_equal:
         print('The results NOT are equal.')
