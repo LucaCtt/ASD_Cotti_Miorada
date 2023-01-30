@@ -116,7 +116,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
             self._visited_nodes += 1
 
             if inter[k] == 1:
-                indexes_temp = np.append(indexes.copy(), k)
+                indexes_temp = np.append(indexes, k)
                 union_temp = np.bitwise_or(union, self._input_matrix[k])
 
                 if np.array_equal(union_temp, self.__ones):
@@ -146,12 +146,9 @@ class ECPlus(EC):
 
     def __init__(self, input_matrix: np.ndarray, time_limit: float = None):
         super().__init__(input_matrix, time_limit)
-        self.__card = np.zeros(self._n, dtype=int)
+        self.__card = np.count_nonzero(input_matrix, axis=1)
 
     def start(self):
-        for i in range(0, self._n):
-            self.__card[i] = np.count_nonzero(self._input_matrix[i])
-
         result = super().start()
         result.plus = True
         return result
@@ -177,7 +174,7 @@ class ECPlus(EC):
             self._visited_nodes += 1
 
             if inter[k] == 1:
-                indexes_temp = np.append(indexes.copy(), k)
+                indexes_temp = np.append(indexes, k)
                 card_temp = card_union + self.__card[k]
 
                 if card_temp == self._m:
