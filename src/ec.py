@@ -25,6 +25,10 @@ class Result:
             and self.visited_nodes == __o.visited_nodes\
             and self.total_nodes == __o.total_nodes
 
+    def perc_visited(self):
+        """Return the percentage of visited nodes."""
+        return round(self.visited_nodes / self.total_nodes * 100, 4)
+
 
 class EC:  # pylint: disable=too-many-instance-attributes
     """The basic EC algorithm."""
@@ -113,12 +117,10 @@ class EC:  # pylint: disable=too-many-instance-attributes
                         if np.any(inter != 0):
                             self.__esplora(indexes, union_value, inter)
 
-        execution_time = time.process_time() - self.__start_time
-
         return Result(coverages=self._coverages,
                       visited_nodes=self._visited_nodes,
                       total_nodes=self._total_nodes,
-                      execution_time=execution_time,
+                      execution_time=self.__execution_time(),
                       stopped=self.__stop_flag,
                       time_limit_reached=self.__time_limit_reached()
                       )
@@ -155,11 +157,14 @@ class EC:  # pylint: disable=too-many-instance-attributes
                         self.__esplora(
                             indexes_temp, union_value_temp, inter_temp)
 
+    def __execution_time(self) -> float:
+        return time.process_time() - self.__start_time
+
     def __time_limit_reached(self) -> bool:
         if self.__time_limit is None:
             return False
 
-        return time.time() - self.__start_time > self.__time_limit
+        return self.__execution_time() > self.__time_limit
 
     def __should_stop(self) -> bool:
         if self.__stop_flag:
@@ -227,8 +232,6 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: Result):
         visited_count (int): The number of nodes visited by the EC algorithm.
         execution_time (float): The execution time of the algorithm.
     """
-    perc_visited = round(result.visited_nodes / result.total_nodes * 100, 4)
-
     with open(output_file, "w", encoding="utf-8") as file:
         exec_time_minutes = round(result.execution_time / 60, 3)
 
@@ -241,7 +244,7 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: Result):
         file.write(f';;; Time limit reached: {result.time_limit_reached}\n')
         file.write(f';;; Nodes visited: {result.visited_nodes}\n')
         file.write(f';;; Total nodes: {result.total_nodes}\n')
-        file.write(f';;; Percentage of nodes visited: {perc_visited}%\n')
+        file.write(f';;; Percentage of nodes visited: {result.perc_visited()}%\n')
         file.write(';;;\n')
 
         idx = 1
