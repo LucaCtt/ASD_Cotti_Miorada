@@ -27,16 +27,19 @@ class Result:
 
 
 class EC:  # pylint: disable=too-many-instance-attributes
-    """The basic EC algorithm.
-    """
+    """The basic EC algorithm."""
 
     def __init__(self, input_matrix: np.ndarray, time_limit: float = None):
+        # A
         self._input_matrix = input_matrix
         self._n, self._m = input_matrix.shape
-        self._visited_nodes = 0
-        self._total_nodes = (2**self._n)-1
-        self._coverages = []
+
+        # B
         self._compat_matrix = np.zeros((self._n, self._n), dtype=int)
+
+        # COV
+        # List instead of numpy array because it is more efficient to append
+        self._coverages = []
 
         self.__time_limit = time_limit
 
@@ -54,39 +57,64 @@ class EC:  # pylint: disable=too-many-instance-attributes
         # Flag for stopping the algorithm.
         self.__stop_flag = False
 
+        # Node statistics
+        self._visited_nodes = 0
+        self._total_nodes = (2**self._n)-1
+
     def stop(self):
-        """Stop the algorithm.
-        """
+        """Stop the algorithm."""
         self.__stop_flag = True
 
     def start(self) -> Result:
-        """Start the algorithm.
-        """
+        """Start the algorithm."""
         for i in range(self._n):
-            if self._should_stop():
+            if self.__should_stop():
                 break
 
             self._visited_nodes += 1
 
+            # If A[i] is empty, skip it.
             if np.array_equal(self._input_matrix[i], self.__zeros):
                 continue
 
+            # If A[i] is equal to M, add it to the coverages.
             if np.array_equal(self._input_matrix[i], self.__ones):
                 self._coverages.append([i])
                 continue
 
+            # Iterate rows before A[i].
             for j in range(i):
-                if self._should_stop():
+                if self.__should_stop():
                     break
 
                 self._visited_nodes += 1
 
+                # If the rows have at least one element in common,
+                # set the compatibility to 0.
                 if np.bitwise_and(self._input_matrix[j], self._input_matrix[i]).any():
                     self._compat_matrix[j, i] = 0
                 else:
-                    self._verify_union(i, j)
+                    indexes = np.array([i, j])
+                    union_value = self._get_union_value(i, j)
+
+                    # If the union of the two rows is equal to M,
+                    # add the indexes to the coverages and set the compatibility to 0.
+                    if self._compare_union_value(union_value):
+                        self._coverages.append(indexes)
+                        self._compat_matrix[j, i] = 0
+                    else:
+                        self._compat_matrix[j, i] = 1
+
+                        # Sets compatible with A[i] and A[j].
+                        inter = np.bitwise_and(
+                            self._compat_matrix[0:j, i], self._compat_matrix[0:j, j])
+
+                        # If there are compatible sets, explore them.
+                        if np.any(inter != 0):
+                            self.__esplora(indexes, union_value, inter)
 
         execution_time = time.process_time() - self.__start_time
+
         return Result(coverages=self._coverages,
                       visited_nodes=self._visited_nodes,
                       total_nodes=self._total_nodes,
@@ -95,37 +123,37 @@ class EC:  # pylint: disable=too-many-instance-attributes
                       time_limit_reached=self.__time_limit_reached()
                       )
 
-    def _verify_union(self, i, j):
-        indexes = np.array([i, j])
-        union = np.bitwise_or(self._input_matrix[i], self._input_matrix[j])
-        if np.array_equal(union, self.__ones):
-            self._coverages.append(indexes)
-            self._compat_matrix[j, i] = 0
-        else:
-            self._compat_matrix[j, i] = 1
-            inter = np.bitwise_and(
-                self._compat_matrix[0:j, i], self._compat_matrix[0:j, j])
-            if inter.size > 0 and not np.array_equal(inter, np.zeros(inter.size, dtype=int)):
-                self.__esplora(indexes, union, inter)
+    def _get_union_value(self, i, j):
+        return np.bitwise_or(self._input_matrix[i], self._input_matrix[j])
 
-    def __esplora(self, indexes, union, inter):
+    def _compare_union_value(self, union_value):
+        return np.array_equal(union_value, self.__ones)
+
+    def _get_union_value_temp(self, union_value, k):
+        return np.bitwise_or(union_value, self._input_matrix[k])
+
+    def __esplora(self, indexes, union_value, inter):
         for k, _ in enumerate(inter):
-            if self._should_stop():
+            if self.__should_stop():
                 break
 
-            self._visited_nodes += 1
-
+            # NB: I cannot remove zero elements from inter
+            # because I would lose information about the indexes.
             if inter[k] == 1:
-                indexes_temp = np.append(indexes, k)
-                union_temp = np.bitwise_or(union, self._input_matrix[k])
+                self._visited_nodes += 1
 
-                if np.array_equal(union_temp, self.__ones):
+                # Try to add A[k] to the coverage.
+                indexes_temp = np.append(indexes, k)
+                union_value_temp = self._get_union_value_temp(union_value, k)
+
+                if self._compare_union_value(union_value_temp):
                     self._coverages.append(indexes_temp)
                 else:
                     inter_temp = np.bitwise_and(
                         inter[0:k], self._compat_matrix[0:k, k])
-                    if inter_temp.size > 0 and not np.array_equal(inter_temp, np.zeros(inter_temp.size, dtype=int)):
-                        self.__esplora(indexes_temp, union_temp, inter_temp)
+                    if np.any(inter_temp != 0):
+                        self.__esplora(
+                            indexes_temp, union_value_temp, inter_temp)
 
     def __time_limit_reached(self) -> bool:
         if self.__time_limit is None:
@@ -133,7 +161,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
 
         return time.time() - self.__start_time > self.__time_limit
 
-    def _should_stop(self) -> bool:
+    def __should_stop(self) -> bool:
         if self.__stop_flag:
             return True
 
@@ -153,38 +181,14 @@ class ECPlus(EC):
         result.plus = True
         return result
 
-    def _verify_union(self, i, j):
-        indexes = np.array([i, j])
-        card_union = self.__card[i] + self.__card[j]
-        if card_union == self._m:
-            self._coverages.append(indexes)
-            self._compat_matrix[j, i] = 0
-        else:
-            self._compat_matrix[j, i] = 1
-            inter = np.bitwise_and(
-                self._compat_matrix[0:j, i], self._compat_matrix[0:j, j])
-            if inter.size > 0 and not np.array_equal(inter, np.zeros(inter.size, dtype=int)):
-                self.__esplora_plus(indexes, card_union, inter)
+    def _get_union_value(self, i, j):
+        return self.__card[i] + self.__card[j]
 
-    def __esplora_plus(self, indexes, card_union, inter):
-        for k, _ in enumerate(inter):
-            if self._should_stop():
-                break
+    def _compare_union_value(self, union_value):
+        return union_value == self._m
 
-            self._visited_nodes += 1
-
-            if inter[k] == 1:
-                indexes_temp = np.append(indexes, k)
-                card_temp = card_union + self.__card[k]
-
-                if card_temp == self._m:
-                    self._coverages.append(indexes_temp)
-                else:
-                    inter_temp = np.bitwise_and(
-                        inter[0:k], self._compat_matrix[0:k, k])
-                    if inter_temp.size > 0 and not np.array_equal(inter_temp, np.zeros(inter_temp.size, dtype=int)):
-                        self.__esplora_plus(
-                            indexes_temp, card_temp, inter_temp)
+    def _get_union_value_temp(self, union_value, k):
+        return union_value + self.__card[k]
 
 
 def read_input(input_file: str) -> np.ndarray:
