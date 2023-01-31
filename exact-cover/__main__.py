@@ -47,14 +47,10 @@ def __compare_cmd():
             f'Fastest was {args.input[min_exec_idx]} with execution time: {min_exec_time}')
 
 
-def __main():
+if __name__ == "__main__":
     if args.command == 'ec':
         __ec_cmd()
     elif args.command == 'gen':
         __gen_cmd()
     elif args.command == 'compare':
         __compare_cmd()
-
-
-if __name__ == "__main__":
-    __main()

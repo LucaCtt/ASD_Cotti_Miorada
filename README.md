@@ -66,7 +66,7 @@ l'opzione `-h` (o `--help`) per ottenere una descrizione delle opzioni disponibi
 Per esempio, per mostrare l'help del comando principale:
 
 ```bash
-python src/main.py -h
+python exact-cover -h
 ```
 
 ### Generazione di istanze di test
@@ -84,7 +84,7 @@ Per esempio, per generare un'istanza di test con `100` elementi in M, `100` elem
 probabilità di 1 pari a `0.5` e senza garanzia di soluzione:
 
 ```bash
-python src/main.py gen -o test/100x100x05.txt -m 100 -n 100 -p 0.5
+python exact-cover gen -o test/100x100x05.txt -m 100 -n 100 -p 0.5
 ```
 
 ### Esecuzione dell'algoritmo EC
@@ -101,7 +101,7 @@ Il seguente comando esegue l'algoritmo EC+ sull'istanza di test `test/100x100x0.
 salvando il risultato in `test/out.txt` e senza limitare il tempo di esecuzione:
 
 ```bash
-python src/main.py ec -i test/100x100x05.txt -o test/out_plus.txt -p
+python exact-cover ec -i test/100x100x05.txt -o test/out_plus.txt -p
 ```
 
 L'esecuzione dell'algoritmo può essere interrotta in qualsiasi momento
@@ -122,13 +122,13 @@ Opzioni disponibili:
 Per esempio, per confrontare i risultati dell'algoritmo EC+ e EC:
 
 ```bash
-python src/main.py compare -i test/out.txt test/out_plus.txt
+python exact-cover compare -i test/out.txt test/out_plus.txt
 ```
 
 Il comando accetta un numero arbitrario di file da confrontare: è sufficiente separarli con uno spazio.
 
 ```bash
-python src/main.py compare -i test/out1.txt test/out2.txt test/out3.txt test/out4.txt
+python exact-cover compare -i test/out1.txt test/out2.txt test/out3.txt test/out4.txt
 ```
 
 ## Formato file

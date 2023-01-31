@@ -4,7 +4,7 @@ Provides the cli for the program.
 
 import argparse
 
-__parser = argparse.ArgumentParser(prog="EC")
+__parser = argparse.ArgumentParser(prog="exact-cover")
 __subp = __parser.add_subparsers(help='sub-command help', dest='command')
 
 # Parser for the ec subcommand
