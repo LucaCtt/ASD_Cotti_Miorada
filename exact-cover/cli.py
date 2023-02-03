@@ -47,25 +47,25 @@ __subparser_gen = __parser_gen.add_subparsers(help='command help',
                                               dest='subcommand')
 
 # Parser for the random gen subcommand
-__parser_sudoku = __subparser_gen.add_parser('rand',
+__parser_rand = __subparser_gen.add_parser('rand',
                                              help='rand help',
                                              formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-__parser_sudoku.add_argument("-m",
+__parser_rand.add_argument("-m",
                              "--mdim",
                              type=int,
                              help="Number of elements in M.",
                              default=10)
-__parser_sudoku.add_argument("-n",
+__parser_rand.add_argument("-n",
                              "--ndim",
                              type=int,
                              help="Number of elements in N.",
                              default=10)
-__parser_sudoku.add_argument("-p",
+__parser_rand.add_argument("-p",
                              "--prob",
                              type=float,
                              help="Probability to generate a 1 in the binomial distribution.",
                              default=0.5)
-__parser_sudoku.add_argument("-g",
+__parser_rand.add_argument("-g",
                              "--guarantee",
                              type=bool,
                              help="Guarantee at least one solution exists.",

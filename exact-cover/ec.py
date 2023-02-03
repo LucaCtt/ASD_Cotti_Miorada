@@ -244,12 +244,13 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: Result):
         file.write(f';;; Time limit reached: {result.time_limit_reached}\n')
         file.write(f';;; Nodes visited: {result.visited_nodes}\n')
         file.write(f';;; Total nodes: {result.total_nodes}\n')
-        file.write(f';;; Percentage of nodes visited: {result.perc_visited()}%\n')
+        file.write(
+            f';;; Percentage of nodes visited: {result.perc_visited()}%\n')
         file.write(';;;\n')
 
         idx = 1
         for i in input_matrix:
-            file.write(f';;; Set {idx:>3}: {i}\n')
+            file.write(f';;; Set {idx:>3}: {np.array2string(i)}\n')
             idx += 1
 
         file.write(';;;\n')

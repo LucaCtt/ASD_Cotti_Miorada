@@ -5,12 +5,15 @@ Main function and the functions for the subcommands.
 """
 
 import signal
-import gen
+from inst import rand, sudoku
 import compare
 import ec
 import cli
+import numpy as np
 
 args = cli.get_args()
+
+np.set_printoptions(linewidth=10000)
 
 
 def __ec_cmd():
@@ -26,17 +29,19 @@ def __ec_cmd():
 
     result = alg.start()
     ec.write_output(args.output, input_matrix, result)
+    print(sudoku.sudoku_to_str(
+        sudoku.Sudoku.from_cover(result.coverages[0], 4)))
 
     print(f'Output file created at \"{args.output}\".')
 
 
 def __gen_cmd():
-    if args.subcommand == 'random':
-        inst = gen.random_inst(args.mdim, args.ndim, args.prob, args.guarantee)
-        gen.write_random_inst(args.output, inst)
+    if args.subcommand == 'rand':
+        inst = rand.gen(args.mdim, args.ndim, args.prob, args.guarantee)
+        rand.write_to_file(args.output, inst)
     elif args.subcommand == 'sudoku':
-        inst = gen.sudoku_inst(args.side_dim, args.diff)
-        gen.write_sudoku_inst(args.output, inst)
+        inst = sudoku.gen(args.side_dim, args.diff)
+        sudoku.write_to_file(args.output, inst)
 
     print(f'Instance created at \"{args.output}\".')
 
