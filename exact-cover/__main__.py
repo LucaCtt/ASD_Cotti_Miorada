@@ -12,6 +12,7 @@ import cli
 
 args = cli.get_args()
 
+
 def __ec_cmd():
     input_matrix = ec.read_input(args.input)
 
@@ -30,14 +31,19 @@ def __ec_cmd():
 
 
 def __gen_cmd():
-    inst = gen.gen_inst(args.mdim, args.ndim, args.prob, args.guarantee)
-    gen.write_inst(args.output, inst)
+    if args.subcommand == 'random':
+        inst = gen.random_inst(args.mdim, args.ndim, args.prob, args.guarantee)
+        gen.write_random_inst(args.output, inst)
+    elif args.subcommand == 'sudoku':
+        inst = gen.sudoku_inst(args.side_dim, args.diff)
+        gen.write_sudoku_inst(args.output, inst)
 
     print(f'Instance created at \"{args.output}\".')
 
 
 def __compare_cmd():
-    all_equal, min_exec_time, min_exec_idx = compare.compare_results(args.input)
+    all_equal, min_exec_time, min_exec_idx = compare.compare_results(
+        args.input)
 
     if not all_equal:
         print('The results NOT are equal.')
