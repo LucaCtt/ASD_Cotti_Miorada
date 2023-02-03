@@ -6,7 +6,6 @@ along with the functions to read and write the input and output files.
 from datetime import datetime
 from dataclasses import dataclass
 import time
-from typing import Tuple
 import numpy as np
 from inst import sudoku
 
@@ -199,44 +198,11 @@ class ECPlus(EC):
         return union_value + self.__card[k]
 
 
-def read_input(input_file: str) -> Tuple[np.ndarray, bool, int]:
-    """Reads an input matrix from a file.
-    Refer to the documentation for the format of the input file.
-
-    Args:
-        input_file (str): The path of the input file.
-
-    Returns:
-        np.ndarray: The input matrix read from the file.
-    """
-    input_matrix = []
-    is_sudoku = False
-    dim = 0
-
-    with open(input_file, "r", encoding="utf-8") as file:
-        for line in file:
-            if 'Sudoku' in line:
-                is_sudoku = True
-                continue
-
-            if 'Dimension' in line:
-                dim = int(line.split()[-1])
-                continue
-
-            if ';;;' in line:
-                continue
-
-            if '-' in line:
-                line = list(line.split())
-                elements = []
-                for element in line[0:-1]:
-                    elements.append(int(element))
-                input_matrix.append(elements)
-
-    return np.array(input_matrix, dtype=int), is_sudoku, dim
-
-
-def write_output(output_file: str, input_matrix: np.ndarray, result: Result, is_sudoku: bool = False, dim: int = 0):
+def write_output(output_file: str,
+                 input_matrix: np.ndarray,
+                 result: Result,
+                 is_sudoku: bool = False,
+                 dim: int = 0):
     """Writes the output of the EC algorithm to a file.
 
     Args:
@@ -281,3 +247,59 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: Result, is_
         else:
             for coverage in result.coverages:
                 file.write(f'{coverage+1}\n')
+
+
+def read_result(file_name: str) -> Result:
+    """Reads the search result from a file.
+
+    Args:
+        file_name (str): The path of the file.
+
+    Returns:
+        ECResult: The search result.
+    """
+    stopped = False
+    visited_count = 0
+    total_nodes = 0
+    execution_time = 0
+    time_limit_reached = False
+    coverages = []
+
+    with open(file_name, 'r', encoding='utf-8') as file:
+        for line in file:
+            if ';;; Stopped' in line:
+                if 'True' in line:
+                    stopped = True
+                continue
+
+            if ';;; Nodes visited' in line:
+                visited_count = int(line.split()[3])
+                continue
+
+            if ';;; Total nodes' in line:
+                total_nodes = int(line.split()[3])
+                continue
+
+            if ';;; Execution time' in line:
+                time_str = line.split()[3]
+                execution_time = float(time_str[:-1])
+                continue
+
+            if ';;; Time limit reached' in line:
+                time_limit_reached = bool(line.split()[4])
+                continue
+
+            if ';;; Exact Coverages' in line:
+                for cov_line in file:
+                    cov = list(list(map(int, cov_line[1:-2].split())))
+                    coverages.append(cov)
+                # Coverages are at the end of the file
+                # so we can just stop iterating.
+                break
+
+    return Result(coverages=np.asarray(coverages, dtype=object),
+                  visited_nodes=visited_count,
+                  total_nodes=total_nodes,
+                  execution_time=execution_time,
+                  stopped=stopped,
+                  time_limit_reached=time_limit_reached)

@@ -1,8 +1,9 @@
-"""main.py: Module for the main program.
+"""main.py
 Main function and the functions for the subcommands.
 """
 
 import signal
+import inst
 from inst import rand, sudoku
 import compare
 import ec
@@ -15,7 +16,7 @@ np.set_printoptions(linewidth=10000)
 
 
 def __ec_cmd():
-    input_matrix, is_sudoku, dim = ec.read_input(args.input)
+    input_matrix, is_sudoku, dim = inst.read_from_file(args.input)
 
     alg = None
     if args.plus:
@@ -34,11 +35,11 @@ def __ec_cmd():
 
 def __gen_cmd():
     if args.subcommand == 'rand':
-        inst = rand.gen_inst(args.mdim, args.ndim, args.prob, args.guarantee)
-        rand.write_to_file(args.output, inst)
+        instance = rand.gen_inst(args.mdim, args.ndim, args.prob, args.guarantee)
+        rand.write_to_file(args.output, instance)
     elif args.subcommand == 'sudoku':
-        inst = sudoku.gen_inst(args.side_dim, args.diff)
-        sudoku.write_to_file(args.output, inst)
+        instance = sudoku.gen_inst(args.side_dim, args.diff)
+        sudoku.write_to_file(args.output, instance)
 
     print(f'Instance created at \"{args.output}\".')
 
