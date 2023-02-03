@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """main.py: Module for the main program.
 Main function and the functions for the subcommands.
 """
@@ -36,10 +34,10 @@ def __ec_cmd():
 
 def __gen_cmd():
     if args.subcommand == 'rand':
-        inst = rand.gen(args.mdim, args.ndim, args.prob, args.guarantee)
+        inst = rand.gen_inst(args.mdim, args.ndim, args.prob, args.guarantee)
         rand.write_to_file(args.output, inst)
     elif args.subcommand == 'sudoku':
-        inst = sudoku.gen(args.side_dim, args.diff)
+        inst = sudoku.gen_inst(args.side_dim, args.diff)
         sudoku.write_to_file(args.output, inst)
 
     print(f'Instance created at \"{args.output}\".')

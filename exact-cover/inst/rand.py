@@ -1,4 +1,4 @@
-"""gen.py
+"""rand.py
 Generation of random instances for the EC problem.
 """
 
@@ -10,6 +10,7 @@ import numpy as np
 @dataclass
 class RandomInstance:
     """Represents a random instance of the EC problem."""
+
     input_matrix: np.ndarray
     prob: float
     guarantee_sol: bool
@@ -17,13 +18,13 @@ class RandomInstance:
     gen_at: datetime = datetime.today()
 
 
-def gen(card_m: int, card_n: int, prob: float, guarantee_sol: bool) -> RandomInstance:
+def gen_inst(card_m: int, card_n: int, prob: float, guarantee_sol: bool) -> RandomInstance:
     """Generates an instance of the EC problem.
 
     Args:
         card_m (int): The cardinality of set M.
         card_n (int): The cardinality of set N.
-        prob (float): The probability of a bit to be 1.
+        prob (float): The probability of a bit to be 1. Must be between 0 and 1.
         guarantee_sol (bool): True if the instance must have at least one solution.
 
 

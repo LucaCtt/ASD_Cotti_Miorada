@@ -1,5 +1,5 @@
 """sudoku.py
-Sudoku puzzle generator.
+Generation of sudoku instances for the EC problem.
 """
 
 from dataclasses import dataclass
@@ -15,35 +15,44 @@ class SudokuInstance:
 
     input_matrix: np.ndarray
     sudoku: 'Sudoku'
-    dim: int
-    difficulty: float
+    dim: int  # Puzzle dimension
+    difficulty: float  # Between 0 and 1
     gen_at: datetime = datetime.today()
 
 
 class Sudoku:  # pylint: disable=too-few-public-methods
-    """Rappresents a Sudoku puzzle."""
+    """Rappresents a Sudoku."""
 
-    def __init__(self, dim=9, board=None):
+    def __init__(self, dim: int, board: np.ndarray = None):
         # The sudoku has dimension dim x dim
         self.dim = dim
+
+        # The sudoku is divided into base x base squares
         self.base = math.isqrt(dim)
+
+        # The board is a dim x dim matrix
         self.board = board
 
         if self.board is None:
             self.__create_board()
 
     def gen_puzzle(self, difficulty: float) -> 'Sudoku':
-        """Generates a puzzle from the board.
+        """Generates a puzzle from the board, by removing some cells.
 
         Args:
             difficulty (float, optional): The difficuly of the puzzle, from 0 to 1.
                                           The higher the difficulty, the more empty cells.
+
+        Returns:
+            Sudoku: The puzzle.
         """
+
         puzzle_board = self.board.copy()
 
         squares = self.dim**2
         num_empties = math.floor(squares * difficulty)
 
+        # Remove cells by setting them to 0
         for cell in random.sample(range(squares), num_empties):
             puzzle_board[cell//self.dim][cell % self.dim] = 0
 
@@ -91,11 +100,12 @@ class Sudoku:  # pylint: disable=too-few-public-methods
                 self.board[row][col] = nums[pattern(row, col)]
 
 
-def gen(dim=9, difficulty=0.3) -> SudokuInstance:
+def gen_inst(dim: int, difficulty: float) -> SudokuInstance:
     """Generates a sudoku puzzle and converts it to an instance of the EC problem.
 
     Args:
-        dim (int, optional): The dimension of the sudoku. Defaults to 9.
+        dim (int, optional): The dimension of the sudoku (dim x dim).
+        diff (float, optional): The difficulty of the puzzle, between 0 and 1.
 
     Returns:
         SudokuInstance: The generated instance.
@@ -108,13 +118,13 @@ def gen(dim=9, difficulty=0.3) -> SudokuInstance:
 
     input_matrix = np.zeros((num_possibilities, num_constraints), dtype=int)
 
-    for row in range(sudoku.dim):
-        for col in range(sudoku.dim):
+    for row in range(dim):
+        for col in range(dim):
             real_entry = sudoku.board[row, col]
 
             # If we don't already have an entry then all entries are possible.
             if real_entry == 0:
-                possible_entries = range(1, sudoku.dim + 1)
+                possible_entries = range(1, dim + 1)
             else:
                 # If we already have an entry then leave out all the other possibilities.
                 possible_entries = range(real_entry, real_entry + 1)
@@ -132,7 +142,7 @@ def __set_constraint_row(puzzle: 'Sudoku',
                          constraints: np.ndarray,
                          row: int,
                          col: int,
-                         entry: int) -> None:
+                         entry: int):
     con_row = (row * puzzle.dim ** 2) + (col * puzzle.dim) + entry - 1
     cell_con_col = (0 * puzzle.dim ** 2) + (row * puzzle.dim) + col
     row_con_col = (1 * puzzle.dim ** 2) + (row * puzzle.dim) + entry - 1
@@ -167,19 +177,19 @@ def write_to_file(output_file: str, inst: SudokuInstance):
         file.write(
             f';;; Difficulty: {inst.difficulty}\n')
         file.write(
-            f';;; Sudoku puzzle: \n{to_str(inst.sudoku, pre=";;; ")}')
+            f';;; Sudoku puzzle: \n{sudoku2str(inst.sudoku, pre=";;; ")}')
 
         for row in inst.input_matrix:
             file.write(
                 f'\n{np.array2string(row)[1:-1]} -')
 
 
-def to_str(sudoku: 'Sudoku', pre=None) -> str:
+def sudoku2str(sudoku: 'Sudoku', pre: str = '') -> str:
     """Converts a sudoku to a string.
 
     Args:
         sudoku (Sudoku): The sudoku to convert.
-        pre (_type_, optional): String to append to the start of every new line. Defaults to None.
+        pre (str, optional): String to append to the start of every new line. Defaults to ''.
 
     Returns:
         str: The sudoku as a string.
@@ -191,16 +201,16 @@ def to_str(sudoku: 'Sudoku', pre=None) -> str:
 
     for i, row in enumerate(sudoku.board):
         if i == 0:
-            rows.append(pre if pre else '')
+            rows.append(pre)
             rows.append(('+-' + '-' * (cell_length + 1) *
                         sudoku.base) * sudoku.base + '+')
 
-        rows.append(f'\n{pre if pre else ""}')
+        rows.append(f'\n{pre}')
         rows.append((('| ' + '{} ' * sudoku.base) * sudoku.base + '|').format(*[format_int.format(
             x) if x != 0 else ' ' * cell_length for x in row]))
 
         if i == sudoku.dim - 1 or i % sudoku.base == sudoku.base - 1:
-            rows.append(f'\n{pre if pre else ""}')
+            rows.append(f'\n{pre}')
             rows.append(('+-' + '-' * (cell_length + 1) *
                         sudoku.base) * sudoku.base + '+')
 

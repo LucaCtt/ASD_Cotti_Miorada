@@ -14,12 +14,13 @@ from inst import sudoku
 @dataclass
 class Result:
     """Represents the results of the EC algorithm."""
+
     coverages: np.ndarray
     visited_nodes: int
     total_nodes: int
     execution_time: float
-    stopped: bool = False
-    time_limit_reached: bool = False
+    stopped: bool
+    time_limit_reached: bool
     plus: bool = False
 
     def __eq__(self, __o: object) -> bool:
@@ -27,7 +28,7 @@ class Result:
             and self.visited_nodes == __o.visited_nodes\
             and self.total_nodes == __o.total_nodes
 
-    def perc_visited(self):
+    def visited_percentage(self):
         """Return the percentage of visited nodes."""
         return round(self.visited_nodes / self.total_nodes * 100, 4)
 
@@ -258,14 +259,14 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: Result, is_
         file.write(f';;; Nodes visited: {result.visited_nodes}\n')
         file.write(f';;; Total nodes: {result.total_nodes}\n')
         file.write(
-            f';;; Percentage of nodes visited: {result.perc_visited()}%\n')
+            f';;; Percentage of nodes visited: {result.visited_percentage()}%\n')
         file.write(';;;\n')
 
         if is_sudoku:
             file.write(';;; Sudoku solutions: \n')
             for coverage in result.coverages:
                 solution = sudoku.Sudoku.from_cover(coverage, dim)
-                file.write(sudoku.to_str(solution, ";;; "))
+                file.write(sudoku.sudoku2str(solution, ";;; "))
                 file.write('\n;;;\n')
 
         idx = 1
