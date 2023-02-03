@@ -15,6 +15,7 @@ class SudokuInstance:
 
     input_matrix: np.ndarray
     sudoku: 'Sudoku'
+    dim: int
     difficulty: float
     gen_at: datetime = datetime.today()
 
@@ -121,7 +122,10 @@ def gen(dim=9, difficulty=0.3) -> SudokuInstance:
             for entry in possible_entries:
                 __set_constraint_row(sudoku, input_matrix, row, col, entry)
 
-    return SudokuInstance(input_matrix=input_matrix, sudoku=sudoku, difficulty=difficulty)
+    return SudokuInstance(input_matrix=input_matrix,
+                          sudoku=sudoku,
+                          dim=dim,
+                          difficulty=difficulty)
 
 
 def __set_constraint_row(puzzle: 'Sudoku',
@@ -159,16 +163,18 @@ def write_to_file(output_file: str, inst: SudokuInstance):
         file.write(';;; Exact-Cover (Sudoku)\n')
         file.write(f';;; Generated at: {inst.gen_at}\n')
         file.write(
+            f';;; Dimension: {inst.dim}\n')
+        file.write(
             f';;; Difficulty: {inst.difficulty}\n')
         file.write(
-            f';;; Sudoku puzzle: \n{sudoku_to_str(inst.sudoku, pre=";;; ")}')
+            f';;; Sudoku puzzle: \n{to_str(inst.sudoku, pre=";;; ")}')
 
         for row in inst.input_matrix:
             file.write(
                 f'\n{np.array2string(row)[1:-1]} -')
 
 
-def sudoku_to_str(sudoku: 'Sudoku', pre=None) -> str:
+def to_str(sudoku: 'Sudoku', pre=None) -> str:
     """Converts a sudoku to a string.
 
     Args:

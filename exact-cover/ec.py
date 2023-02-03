@@ -6,7 +6,9 @@ along with the functions to read and write the input and output files.
 from datetime import datetime
 from dataclasses import dataclass
 import time
+from typing import Tuple
 import numpy as np
+from inst import sudoku
 
 
 @dataclass
@@ -196,7 +198,7 @@ class ECPlus(EC):
         return union_value + self.__card[k]
 
 
-def read_input(input_file: str) -> np.ndarray:
+def read_input(input_file: str) -> Tuple[np.ndarray, bool, int]:
     """Reads an input matrix from a file.
     Refer to the documentation for the format of the input file.
 
@@ -207,11 +209,22 @@ def read_input(input_file: str) -> np.ndarray:
         np.ndarray: The input matrix read from the file.
     """
     input_matrix = []
+    is_sudoku = False
+    dim = 0
 
     with open(input_file, "r", encoding="utf-8") as file:
         for line in file:
+            if 'Sudoku' in line:
+                is_sudoku = True
+                continue
+
+            if 'Dimension' in line:
+                dim = int(line.split()[-1])
+                continue
+
             if ';;;' in line:
                 continue
+
             if '-' in line:
                 line = list(line.split())
                 elements = []
@@ -219,10 +232,10 @@ def read_input(input_file: str) -> np.ndarray:
                     elements.append(int(element))
                 input_matrix.append(elements)
 
-    return np.array(input_matrix, dtype=int)
+    return np.array(input_matrix, dtype=int), is_sudoku, dim
 
 
-def write_output(output_file: str, input_matrix: np.ndarray, result: Result):
+def write_output(output_file: str, input_matrix: np.ndarray, result: Result, is_sudoku: bool = False, dim: int = 0):
     """Writes the output of the EC algorithm to a file.
 
     Args:
@@ -247,6 +260,13 @@ def write_output(output_file: str, input_matrix: np.ndarray, result: Result):
         file.write(
             f';;; Percentage of nodes visited: {result.perc_visited()}%\n')
         file.write(';;;\n')
+
+        if is_sudoku:
+            file.write(';;; Sudoku solutions: \n')
+            for coverage in result.coverages:
+                solution = sudoku.Sudoku.from_cover(coverage, dim)
+                file.write(sudoku.to_str(solution, ";;; "))
+                file.write('\n;;;\n')
 
         idx = 1
         for i in input_matrix:

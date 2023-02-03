@@ -17,7 +17,7 @@ np.set_printoptions(linewidth=10000)
 
 
 def __ec_cmd():
-    input_matrix = ec.read_input(args.input)
+    input_matrix, is_sudoku, dim = ec.read_input(args.input)
 
     alg = None
     if args.plus:
@@ -28,9 +28,8 @@ def __ec_cmd():
     signal.signal(signal.SIGINT, lambda *_: alg.stop())
 
     result = alg.start()
-    ec.write_output(args.output, input_matrix, result)
-    print(sudoku.sudoku_to_str(
-        sudoku.Sudoku.from_cover(result.coverages[0], 4)))
+    ec.write_output(output_file=args.output, input_matrix=input_matrix,
+                    result=result, is_sudoku=is_sudoku, dim=dim)
 
     print(f'Output file created at \"{args.output}\".')
 

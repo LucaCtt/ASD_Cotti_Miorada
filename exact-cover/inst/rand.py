@@ -65,7 +65,6 @@ def gen(card_m: int, card_n: int, prob: float, guarantee_sol: bool) -> RandomIns
         input_matrix[i] = row
 
     fixed_zero_col = False
-
     # Check that there are no empty columns,
     # which would make the problem unsolvable.
     # If there are, for each empty column a random row is chosen
