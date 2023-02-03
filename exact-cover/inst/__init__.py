@@ -3,7 +3,7 @@ Generation of instances for the exact cover problem.
 """
 
 from typing import Tuple
-from numpy import np
+import numpy as np
 
 
 def read_from_file(input_file: str) -> Tuple[np.ndarray, bool, int]:
