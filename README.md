@@ -22,7 +22,7 @@ I test per verificare la performance dell'implementazione si trovano in
       - [Istanza casuale](#istanza-casuale)
       - [Istanza sudoku](#istanza-sudoku)
     - [File di output](#file-di-output)
-    - [Istanza casuale](#istanza-casuale-1)
+      - [Istanza casuale](#istanza-casuale-1)
       - [Istanza sudoku](#istanza-sudoku-1)
   - [Licenza](#licenza)
   - [Autori](#autori)
@@ -206,7 +206,7 @@ python exact-cover compare -i test/out1.txt test/out2.txt test/out3.txt test/out
 ```
 ### File di output
 
-### Istanza casuale
+#### Istanza casuale
 
 ```text
 ;;; EC Algorithm (Base version)                           # Versione dell'algoritmo.
