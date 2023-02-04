@@ -181,9 +181,13 @@ class ECPlus(EC):
     """Implementation of the EC plus algorithm.
     """
 
-    def __init__(self, input_matrix: np.ndarray, time_limit: float = None):
+    def __init__(self, input_matrix: Union[np.ndarray, scipy.sparse.spmatrix], time_limit: float = None):
         super().__init__(input_matrix, time_limit)
-        self.__card = np.count_nonzero(input_matrix, axis=1)
+
+        try:
+            self.__card = input_matrix.count_nonzero(axis=1)
+        except AttributeError:
+            self.__card = np.count_nonzero(input_matrix, axis=1)
 
     def start(self):
         result = super().start()
