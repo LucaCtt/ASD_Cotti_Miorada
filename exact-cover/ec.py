@@ -6,7 +6,9 @@ along with the functions to read and write the input and output files.
 from datetime import datetime
 from dataclasses import dataclass
 import time
+from typing import Union
 import numpy as np
+import scipy.sparse
 from inst import sudoku
 
 
@@ -23,7 +25,7 @@ class Result:
     plus: bool = False
 
     def __eq__(self, __o: object) -> bool:
-        return self.coverages ==  __o.coverages \
+        return self.coverages == __o.coverages \
             and self.visited_nodes == __o.visited_nodes\
             and self.total_nodes == __o.total_nodes
 
@@ -35,7 +37,7 @@ class Result:
 class EC:  # pylint: disable=too-many-instance-attributes
     """The basic EC algorithm."""
 
-    def __init__(self, input_matrix: np.ndarray, time_limit: float = None):
+    def __init__(self, input_matrix: Union[np.ndarray, scipy.sparse.spmatrix], time_limit: float = None):
         # A
         self._input_matrix = input_matrix
         self._n, self._m = input_matrix.shape

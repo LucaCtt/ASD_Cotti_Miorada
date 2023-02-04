@@ -4,21 +4,27 @@ Generation of random instances for the EC problem.
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Union
 import numpy as np
+from scipy import sparse
 
 
 @dataclass
 class RandomInstance:
     """Represents a random instance of the EC problem."""
 
-    input_matrix: np.ndarray
+    input_matrix: Union[np.ndarray, sparse.spmatrix]
     prob: float
     guarantee_sol: bool
     fixed_zero_col: bool
     gen_at: datetime = datetime.today()
 
 
-def gen_inst(card_m: int, card_n: int, prob: float, guarantee_sol: bool) -> RandomInstance:
+def gen_inst(card_m: int,
+             card_n: int,
+             prob: float,
+             guarantee_sol: bool,
+             use_sparse: bool = False) -> RandomInstance:
     """Generates an instance of the EC problem.
 
     Args:
@@ -26,6 +32,7 @@ def gen_inst(card_m: int, card_n: int, prob: float, guarantee_sol: bool) -> Rand
         card_n (int): The cardinality of set N.
         prob (float): The probability of a bit to be 1. Must be between 0 and 1.
         guarantee_sol (bool): True if the instance must have at least one solution.
+        use_sparse (bool): True if the instance must be represented as a sparse matrix. (default: False)
 
 
     Returns:
@@ -77,7 +84,7 @@ def gen_inst(card_m: int, card_n: int, prob: float, guarantee_sol: bool) -> Rand
             input_matrix[np.random.randint(
                 input_matrix.shape[0], size=1), idx] = 1
 
-    return RandomInstance(input_matrix=input_matrix,
+    return RandomInstance(input_matrix=sparse.csr_matrix(input_matrix) if use_sparse else input_matrix,
                           prob=prob,
                           guarantee_sol=guarantee_sol,
                           fixed_zero_col=fixed_zero_col)
