@@ -63,3 +63,4 @@ if __name__ == "__main__":
         __gen_cmd()
     elif args.command == 'compare':
         __compare_cmd()
+        

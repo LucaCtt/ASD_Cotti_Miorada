@@ -38,11 +38,7 @@ __parser_ec.add_argument("-p",
 __parser_gen = __subparser.add_parser('gen',
                                       help='gen help',
                                       formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-__parser_gen.add_argument("-o",
-                          "--output",
-                          type=str,
-                          help="Output file.",
-                          default="test/in.txt")
+
 __subparser_gen = __parser_gen.add_subparsers(help='command help',
                                               dest='subcommand')
 
@@ -50,6 +46,11 @@ __subparser_gen = __parser_gen.add_subparsers(help='command help',
 __parser_rand = __subparser_gen.add_parser('rand',
                                              help='rand help',
                                              formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+__parser_rand.add_argument("-o",
+                          "--output",
+                          type=str,
+                          help="Output file.",
+                          default="test/in.txt")
 __parser_rand.add_argument("-m",
                              "--mdim",
                              type=int,
@@ -76,6 +77,11 @@ __parser_rand.add_argument("-g",
 __parser_sudoku = __subparser_gen.add_parser('sudoku',
                                              help='sudoku help',
                                              formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+__parser_sudoku.add_argument("-o",
+                          "--output",
+                          type=str,
+                          help="Output file.",
+                          default="test/in.txt")
 __parser_sudoku.add_argument("-s",
                              "--side-dim",
                              type=int,
@@ -105,4 +111,8 @@ def get_args() -> argparse.Namespace:
     Returns:
         argparse.Namespace: the arguments parsed from the cli.
     """
-    return __parser.parse_args()
+    args = __parser.parse_args()
+    if not args.command:
+        __parser.error('No arguments provided.')
+
+    return args

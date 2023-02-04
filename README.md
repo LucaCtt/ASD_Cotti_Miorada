@@ -13,11 +13,17 @@ I test per verificare la performance dell'implementazione si trovano in
   - [Requisiti](#requisiti)
   - [Avvio dell'applicazione](#avvio-dellapplicazione)
     - [Generazione di istanze di test](#generazione-di-istanze-di-test)
+      - [Istanze di test casuali](#istanze-di-test-casuali)
+      - [Istanze di test sudoku](#istanze-di-test-sudoku)
     - [Esecuzione dell'algoritmo EC](#esecuzione-dellalgoritmo-ec)
     - [Confronto tra due risultati dell'algoritmo EC](#confronto-tra-due-risultati-dellalgoritmo-ec)
   - [Formato file](#formato-file)
     - [File di input](#file-di-input)
+      - [Istanza casuale](#istanza-casuale)
+      - [Istanza sudoku](#istanza-sudoku)
     - [File di output](#file-di-output)
+    - [Istanza casuale](#istanza-casuale-1)
+      - [Istanza sudoku](#istanza-sudoku-1)
   - [Licenza](#licenza)
   - [Autori](#autori)
 
@@ -25,14 +31,20 @@ I test per verificare la performance dell'implementazione si trovano in
 ## Struttura del progetto
 
     .
-    ├── src                     # Sorgenti
+    ├── exact-cover             
+    │   ├── __main__.py         # Punto di ingresso dell'applicazione
     │   ├── cli.py              # Interfaccia a riga di comando
     │   ├── compare.py          # Funzioni di confronto tra due risultati dell'algoritmo EC
     │   ├── ec.py               # Implementazione dell'algoritmo EC (ed EC+)
-    │   ├── gen.py              # Generazione di istanze di test
-    │   └── main.py             # Script principale
-    ├── test                    # Istanze di test
-    │   └── ...
+    │   └── inst                
+    │       ├── rand.py         # Generazione di istanze di test casuali
+    │       └── sudoku.py       # Generazione di istanze di test sudoku
+    ├── test                    
+    │   ├── rand                
+    │   │   └── ...             # Istanze di test casuali
+    │   └── sudoku               
+    │       └── ...             # Istanze di test sudoku
+    ├── .env                    # Variabili d'ambiente
     ├── .gitignore              # Git ignore file
     ├── consegna.pdf            # Consegna del progetto
     ├── CITATION.cff            # File di citazione
@@ -53,14 +65,14 @@ pip install -r requirements.txt
 
 ## Avvio dell'applicazione
 
-Una volta installate le dipendenze, è possibile avviare l'applicazione eseguendo lo script `main.py`
-nella cartella `src`, che supporta i seguenti sotto-comandi:
+Una volta installate le dipendenze, è possibile avviare l'applicazione usando l'interprete di
+Python, specificando uno dei seguenti comandi:
 
 - `gen`: genera istanze di test;
 - `ec`: esegue l'algoritmo EC;
 - `compare`: confronta risultati dell'algoritmo EC.
 
-Sia sul comando principale che sui sotto-comandi è possibile utilizzare
+In qualsiasi momento è possibile possibile utilizzare
 l'opzione `-h` (o `--help`) per ottenere una descrizione delle opzioni disponibili.
 
 Per esempio, per mostrare l'help del comando principale:
@@ -72,6 +84,11 @@ python exact-cover -h
 ### Generazione di istanze di test
 
 Per generare istanze di test è possibile utilizzare il comando `gen`.
+I sottocomandi `rand` e `sudoku` generano rispettivamente istanze di test casuali e sudoku.
+
+Nella cartella `test` è possibile trovare delle istanze di test già generate (e risolte).
+
+#### Istanze di test casuali
 
 Le opzioni disponibili sono:
 - `-o`, `--output`: file su cui salvare l'istanza generata (default: `test/in.txt`);
@@ -80,11 +97,24 @@ Le opzioni disponibili sono:
 - `-p`, `--prob`: probabilità di generaee 1 nella distribuzione binomiale (default: `0.5`);
 - `-g`, `--guarantee`: se deve essere garantita almeno una soluzione all'istanza generata (default: `False`).
 
-Per esempio, per generare un'istanza di test con `100` elementi in M, `100` elementi in N,
+Per esempio, per generare un'istanza di test casuale con `100` elementi in M, `100` elementi in N,
 probabilità di 1 pari a `0.5` e senza garanzia di soluzione:
 
 ```bash
-python exact-cover gen -o test/100x100x05.txt -m 100 -n 100 -p 0.5
+python exact-cover gen rand -o test/100x100x05.txt -m 100 -n 100 -p 0.5
+```
+
+#### Istanze di test sudoku
+
+La generazione di sudoku è configurabile con le seguenti opzioni:
+- `-o`, `--output`: file su cui salvare l'istanza generata (default: `test/in.txt`);
+- `-s`, `--side-dim`: dimensione (del lato) del sudoku (default: `9`);
+- `-d`, `--diff`: difficoltà del sudoku, da 0 (sudoku pieno) a 1 (sudoku vuoto) (default: `0.3`);
+
+Per esempio, per generare un'istanza sudoku `9x9`, con difficoltà pari a `0.3`:
+
+```bash
+python exact-cover gen sudoku -o test/9x9x03.txt
 ```
 
 ### Esecuzione dell'algoritmo EC
@@ -97,7 +127,7 @@ Le opzioni supportate sono:
 - `-p`, `--plus`: se deve essere eseguito l'algoritmo EC+ (default: `False`);
 - `-t`, `--time`: tempo massimo di esecuzione dell'algoritmo in secondi (opzionale).
 
-Il seguente comando esegue l'algoritmo EC+ sull'istanza di test `test/100x100x0.5.txt`,
+Il seguente comando esegue l'algoritmo EC+ sull'istanza di test `test/100x100x05.txt`,
 salvando il risultato in `test/out.txt` e senza limitare il tempo di esecuzione:
 
 ```bash
@@ -135,7 +165,10 @@ python exact-cover compare -i test/out1.txt test/out2.txt test/out3.txt test/out
 
 ### File di input
 
+#### Istanza casuale
+
 ```text
+;;; Exact-Cover (Random)                      # Tipo di istanza.
 ;;; Generated at: 2023-01-28 10:05:39.256451  # Data di generazione.
 ;;; Cardinality of M: 5                       # Cardinalità insieme M.
 ;;; Cardinality of N: 8                       # Cardinalità insieme N. 
@@ -152,7 +185,28 @@ python exact-cover compare -i test/out1.txt test/out2.txt test/out3.txt test/out
 0 0 1 0 1 -                                   #
 ```
 
+#### Istanza sudoku
+
+```text
+;;; Exact-Cover (Sudoku)                      
+;;; Generated at: 2023-02-04 14:46:34.223187  
+;;; Dimension: 4                              # Dimensione del sudoku (dim x dim)
+;;; Difficulty: 0.4                           # Difficoltà
+;;; Sudoku puzzle:                            #
+;;; +-----+-----+                             #
+;;; | 3 4 |   1 |                             #
+;;; |   1 | 3   |                             # Sudoku da risolvere.
+;;; +-----+-----+                             #
+;;; | 4   | 1 3 |                             #
+;;; | 1 3 |     |                             #
+;;; +-----+-----+                             #
+0 0 0 0 0 0 0 0 0 0 0 0 0 ...                 # 
+0 0 0 0 0 0 0 0 0 0 0 0 0 ...                 # Matrice A equivalente al sudoku.
+...                                           #
+```
 ### File di output
+
+### Istanza casuale
 
 ```text
 ;;; EC Algorithm (Base version)                           # Versione dell'algoritmo.
@@ -178,9 +232,37 @@ python exact-cover compare -i test/out1.txt test/out2.txt test/out3.txt test/out
 [6 5 1]                                                   #
 ```
 
+#### Istanza sudoku
+
+```text
+;;; EC Algorithm (Plus version)
+;;; Executed at: 2023-02-04 14:50:18.334008
+;;; Execution time: 34.082059568000005s (0.568 minutes) 
+;;; Stopped: False
+;;; Time limit reached: False
+;;; Nodes visited: 2900522
+;;; Total nodes: 18446744073709551615
+;;; Percentage of nodes visited: 0.0%
+;;;
+;;; Sudoku solutions:                                      #
+;;; +-----+-----+                                          #
+;;; | 3 4 | 2 1 |                                          #
+;;; | 2 1 | 3 4 |                                          # Soluzioni del sudoku.
+;;; +-----+-----+                                          #
+;;; | 4 2 | 1 3 |                                          #
+;;; | 1 3 | 4 2 |                                          #
+;;; +-----+-----+                                          #
+;;;
+;;; Set   1: [0 0 ... ]
+;;; ...
+;;;
+;;; Exact Coverages:
+[ 3  8 10 13 18 21 27 32 36 38 41 47 49 55 60 62]
+```
+
 ## Licenza
 
-MIT.
+MIT (vedi [LICENSE](LICENSE)).
 
 ## Autori
 
