@@ -14,7 +14,7 @@ from inst import sudoku
 class Result:
     """Represents the results of the EC algorithm."""
 
-    coverages: np.ndarray
+    coverages: list
     visited_nodes: int
     total_nodes: int
     execution_time: float
@@ -23,7 +23,7 @@ class Result:
     plus: bool = False
 
     def __eq__(self, __o: object) -> bool:
-        return np.array_equal(self.coverages, __o.coverages)\
+        return self.coverages ==  __o.coverages \
             and self.visited_nodes == __o.visited_nodes\
             and self.total_nodes == __o.total_nodes
 
@@ -297,7 +297,7 @@ def read_result(file_name: str) -> Result:
                 # so we can just stop iterating.
                 break
 
-    return Result(coverages=np.asarray(coverages, dtype=object),
+    return Result(coverages=coverages,
                   visited_nodes=visited_count,
                   total_nodes=total_nodes,
                   execution_time=execution_time,
