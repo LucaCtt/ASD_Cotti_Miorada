@@ -3,7 +3,6 @@ Main function and the functions for the subcommands.
 """
 
 import signal
-import inst
 from inst import rand, sudoku
 import compare
 import ec
@@ -16,7 +15,7 @@ np.set_printoptions(linewidth=10000)
 
 
 def __ec_cmd():
-    input_matrix, is_sudoku, dim = inst.read_from_file(args.input)
+    input_matrix, is_sudoku, dim = ec.read_from_file(args.input, args.sparse)
 
     alg = None
     if args.plus:
@@ -35,7 +34,8 @@ def __ec_cmd():
 
 def __gen_cmd():
     if args.subcommand == 'rand':
-        instance = rand.gen_inst(args.mdim, args.ndim, args.prob, args.guarantee)
+        instance = rand.gen_inst(args.mdim, args.ndim,
+                                 args.prob, args.guarantee)
         rand.write_to_file(args.output, instance)
     elif args.subcommand == 'sudoku':
         instance = sudoku.gen_inst(args.side_dim, args.diff)
@@ -63,4 +63,3 @@ if __name__ == "__main__":
         __gen_cmd()
     elif args.command == 'compare':
         __compare_cmd()
-        

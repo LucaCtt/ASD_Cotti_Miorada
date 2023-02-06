@@ -6,10 +6,10 @@ along with the functions to read and write the input and output files.
 from datetime import datetime
 from dataclasses import dataclass
 import time
-from typing import Union
+from typing import Tuple
 import numpy as np
-import scipy.sparse
 from inst import sudoku
+from input_matrix import InputMatrix, DenseInputMatrix, SparseInputMatrix
 
 
 @dataclass
@@ -37,7 +37,7 @@ class Result:
 class EC:  # pylint: disable=too-many-instance-attributes
     """The basic EC algorithm."""
 
-    def __init__(self, input_matrix: Union[np.ndarray, scipy.sparse.spmatrix], time_limit: float = None):
+    def __init__(self, input_matrix: InputMatrix, time_limit: float = None):
         # A
         self._input_matrix = input_matrix
         self._n, self._m = input_matrix.shape
@@ -46,7 +46,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
         self._compat_matrix = np.zeros((self._n, self._n), dtype=int)
 
         # COV
-        # List instead of numpy array because it is more efficient to append
+        # List instead of numpy array because it is more efficient to append.
         self._coverages = []
 
         self.__time_limit = time_limit
@@ -55,19 +55,11 @@ class EC:  # pylint: disable=too-many-instance-attributes
         # as it measures the time spent by the process in the CPU.
         self.__start_time = time.process_time()
 
-        # Array of 0 for checking if A[i] is equal to empty set.
-        self.__zeros = np.zeros(self._m, dtype=int)
-
-        # Array of 1 for checking if A[i] is equal to M.
-        # A[i] = M if A[i] contains all 1.
-        self.__ones = np.ones(self._m, dtype=int)
-
         # Flag for stopping the algorithm.
         self.__stop_flag = False
 
-        # Node statistics
+        # Node statistics.
         self._visited_nodes = 0
-        self._total_nodes = (2**self._n)-1
 
     def stop(self):
         """Stop the algorithm."""
@@ -82,11 +74,11 @@ class EC:  # pylint: disable=too-many-instance-attributes
             self._visited_nodes += 1
 
             # If A[i] is empty, skip it.
-            if np.array_equal(self._input_matrix[i], self.__zeros):
+            if self._input_matrix.row_empty(i):
                 continue
 
             # If A[i] is equal to M, add it to the coverages.
-            if np.array_equal(self._input_matrix[i], self.__ones):
+            if self._input_matrix.row_full(i):
                 self._coverages.append([i])
                 continue
 
@@ -99,15 +91,16 @@ class EC:  # pylint: disable=too-many-instance-attributes
 
                 # If the rows have at least one element in common,
                 # set the compatibility to 0.
-                if np.bitwise_and(self._input_matrix[j], self._input_matrix[i]).any():
+                _, nnz_inter = self._input_matrix.rows_intersection(i, j)
+                if nnz_inter > 0:
                     self._compat_matrix[j, i] = 0
                 else:
                     indexes = np.array([i, j])
-                    union_value = self._get_union_value(i, j)
+                    union_value, is_cov = self._get_union_value(i, j)
 
                     # If the union of the two rows is equal to M,
                     # add the indexes to the coverages and set the compatibility to 0.
-                    if self._compare_union_value(union_value):
+                    if is_cov:
                         self._coverages.append(indexes)
                         self._compat_matrix[j, i] = 0
                     else:
@@ -123,20 +116,19 @@ class EC:  # pylint: disable=too-many-instance-attributes
 
         return Result(coverages=self._coverages,
                       visited_nodes=self._visited_nodes,
-                      total_nodes=self._total_nodes,
+                      total_nodes=(2**self._n)-1,
                       execution_time=self.__execution_time(),
                       stopped=self.__stop_flag,
                       time_limit_reached=self.__time_limit_reached()
                       )
 
     def _get_union_value(self, i, j):
-        return np.bitwise_or(self._input_matrix[i], self._input_matrix[j])
-
-    def _compare_union_value(self, union_value):
-        return np.array_equal(union_value, self.__ones)
+        union, nnz_union = self._input_matrix.rows_union(i, j)
+        return union, nnz_union == self._m
 
     def _get_union_value_temp(self, union_value, k):
-        return np.bitwise_or(union_value, self._input_matrix[k])
+        union_tem, nnz_union_tem = self._input_matrix.union(k, union_value)
+        return union_tem, nnz_union_tem == self._m
 
     def __esplora(self, indexes, union_value, inter):
         for k, _ in enumerate(inter):
@@ -150,9 +142,10 @@ class EC:  # pylint: disable=too-many-instance-attributes
 
                 # Try to add A[k] to the coverage.
                 indexes_temp = np.append(indexes, k)
-                union_value_temp = self._get_union_value_temp(union_value, k)
+                union_value_temp, is_cov = self._get_union_value_temp(
+                    union_value, k)
 
-                if self._compare_union_value(union_value_temp):
+                if is_cov:
                     self._coverages.append(indexes_temp)
                 else:
                     inter_temp = np.bitwise_and(
@@ -181,13 +174,9 @@ class ECPlus(EC):
     """Implementation of the EC plus algorithm.
     """
 
-    def __init__(self, input_matrix: Union[np.ndarray, scipy.sparse.spmatrix], time_limit: float = None):
+    def __init__(self, input_matrix: InputMatrix, time_limit: float = None):
         super().__init__(input_matrix, time_limit)
-
-        try:
-            self.__card = input_matrix.count_nonzero(axis=1)
-        except AttributeError:
-            self.__card = np.count_nonzero(input_matrix, axis=1)
+        self.__card = input_matrix.nonzero_per_col()
 
     def start(self):
         result = super().start()
@@ -195,17 +184,57 @@ class ECPlus(EC):
         return result
 
     def _get_union_value(self, i, j):
-        return self.__card[i] + self.__card[j]
-
-    def _compare_union_value(self, union_value):
-        return union_value == self._m
+        union_value = self.__card[i] + self.__card[j]
+        return union_value, union_value == self._m
 
     def _get_union_value_temp(self, union_value, k):
-        return union_value + self.__card[k]
+        union_value_temp = union_value + self.__card[k]
+        return union_value_temp, union_value_temp == self._m
+
+
+def read_from_file(input_file: str, use_sparse: bool = False) -> Tuple[InputMatrix, bool, int]:
+    """Reads an input matrix from a file.
+    Refer to the documentation for the format of the input file.
+
+    Args:
+        input_file (str): The path of the input file.
+        use_sparse (bool): If True, the input matrix is returned as a sparse matrix.
+
+    Returns:
+        np.ndarray: The input matrix read from the file.
+    """
+
+    input_matrix = []
+    is_sudoku = False
+    dim = 0
+
+    with open(input_file, "r", encoding="utf-8") as file:
+        for line in file:
+            if 'Sudoku' in line:
+                is_sudoku = True
+                continue
+
+            if 'Dimension' in line:
+                dim = int(line.split()[-1])
+                continue
+
+            if ';;;' in line:
+                continue
+
+            if '-' in line:
+                line = list(line.split())
+                elements = []
+                for element in line[0:-1]:
+                    elements.append(int(element))
+                input_matrix.append(elements)
+
+    converted_matrix = SparseInputMatrix(
+        input_matrix) if use_sparse else DenseInputMatrix(input_matrix)
+    return converted_matrix, is_sudoku, dim
 
 
 def write_output(output_file: str,
-                 input_matrix: np.ndarray,
+                 input_matrix: InputMatrix,
                  result: Result,
                  is_sudoku: bool = False,
                  dim: int = 0):

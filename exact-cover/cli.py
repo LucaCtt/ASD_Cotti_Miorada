@@ -33,6 +33,12 @@ __parser_ec.add_argument("-p",
                          help="Use EC plus instead of basic algorithm.",
                          action=argparse.BooleanOptionalAction,
                          default=False)
+__parser_ec.add_argument("-s",
+                         "--sparse",
+                         type=bool,
+                         help="Use sparse matrix representation.",
+                         action=argparse.BooleanOptionalAction,
+                         default=False)
 
 # Parser for the gen subcommand
 __parser_gen = __subparser.add_parser('gen',
