@@ -1,6 +1,6 @@
 ;;; EC Algorithm (Base version)
-;;; Executed at: 2023-02-06 10:45:09.693491
-;;; Execution time: 0.09227680800000004s (0.002 minutes) 
+;;; Executed at: 2023-02-06 10:47:19.474140
+;;; Execution time: 0.30513803599999995s (0.005 minutes) 
 ;;; Stopped: False
 ;;; Time limit reached: False
 ;;; Nodes visited: 1023

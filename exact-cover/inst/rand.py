@@ -4,7 +4,6 @@ Generation of random instances for the EC problem.
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Union
 import numpy as np
 from scipy import sparse
 
@@ -13,7 +12,8 @@ from scipy import sparse
 class RandomInstance:
     """Represents a random instance of the EC problem."""
 
-    input_matrix: Union[np.ndarray, sparse.spmatrix]
+    input_matrix: np.ndarray
+    input_matrix_sparse: sparse.spmatrix
     prob: float
     guarantee_sol: bool
     fixed_zero_col: bool
@@ -24,7 +24,7 @@ def gen_inst(card_m: int,
              card_n: int,
              prob: float,
              guarantee_sol: bool,
-             use_sparse: bool = False) -> RandomInstance:
+             include_sparse: bool = False) -> RandomInstance:
     """Generates an instance of the EC problem.
 
     Args:
@@ -84,7 +84,9 @@ def gen_inst(card_m: int,
             input_matrix[np.random.randint(
                 input_matrix.shape[0], size=1), idx] = 1
 
-    return RandomInstance(input_matrix=sparse.csr_matrix(input_matrix) if use_sparse else input_matrix,
+    return RandomInstance(input_matrix=input_matrix,
+                          input_matrix_sparse=sparse.csr_matrix(
+                              input_matrix) if include_sparse else None,
                           prob=prob,
                           guarantee_sol=guarantee_sol,
                           fixed_zero_col=fixed_zero_col)
