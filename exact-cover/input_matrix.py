@@ -113,27 +113,27 @@ class SparseInputMatrix(InputMatrix[sparse.spmatrix]):
         super().__init__(sparse.csr_matrix(input_matrix))
 
     def row_empty(self, i: int) -> bool:
-        return self._input_matrix.getrow(i).nnz == 0
+        return self._input_matrix[i].nnz == 0
 
     def row_full(self, i: int) -> bool:
-        return self._input_matrix.getrow(i).nnz == self._input_matrix.shape[1]
+        return self._input_matrix[i].nnz == self._input_matrix.shape[1]
 
     def intersection(self, i: int, array: sparse.spmatrix) -> Tuple[sparse.spmatrix, int]:
-        inter = self._input_matrix.getrow(i).multiply(array)
+        inter = self._input_matrix[i].multiply(array)
         return inter, inter.nnz
 
     def rows_intersection(self, i: int, j: int) -> Tuple[sparse.spmatrix, int]:
-        return self.intersection(i, self._input_matrix.getrow(j))
+        return self.intersection(i, self._input_matrix[j])
 
     def union(self, i: int, array: sparse.spmatrix) -> Tuple[sparse.spmatrix, int]:
-        union = self._input_matrix.getrow(i) + array
+        union = self._input_matrix[i] + array
         return union, union.nnz
 
     def nonzero_per_col(self):
         return self._input_matrix.getnnz(axis=1)
 
     def rows_union(self, i: int, j: int) -> Tuple[sparse.spmatrix, bool]:
-        return self.union(i, self._input_matrix.getrow(j))
+        return self.union(i, self._input_matrix[j])
 
     def __iter__(self):
         return iter(self._input_matrix.toarray())
