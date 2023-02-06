@@ -3,6 +3,7 @@ Implementation of the EC and EC plus algorithms,
 along with the functions to read and write the input and output files.
 """
 
+from collections import deque
 from datetime import datetime
 from dataclasses import dataclass
 import time
@@ -95,13 +96,13 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 if nnz_inter > 0:
                     self._compat_matrix[j, i] = 0
                 else:
-                    indexes = np.array([i, j])
+                    indexes = deque([i, j])
                     union_value, is_cov = self._get_union_value(i, j)
 
                     # If the union of the two rows is equal to M,
                     # add the indexes to the coverages and set the compatibility to 0.
                     if is_cov:
-                        self._coverages.append(indexes)
+                        self._coverages.append(np.array(indexes))
                         self._compat_matrix[j, i] = 0
                     else:
                         self._compat_matrix[j, i] = 1
@@ -141,18 +142,19 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 self._visited_nodes += 1
 
                 # Try to add A[k] to the coverage.
-                indexes_temp = np.append(indexes, k)
+                indexes.append(k)
                 union_value_temp, is_cov = self._get_union_value_temp(
                     union_value, k)
 
                 if is_cov:
-                    self._coverages.append(indexes_temp)
+                    self._coverages.append(np.array(indexes))
+                    indexes.pop()
                 else:
                     inter_temp = np.bitwise_and(
                         inter[0:k], self._compat_matrix[0:k, k])
                     if np.any(inter_temp != 0):
-                        self.__esplora(
-                            indexes_temp, union_value_temp, inter_temp)
+                        self.__esplora(indexes, union_value_temp, inter_temp)
+                    indexes.pop()
 
     def __execution_time(self) -> float:
         return time.process_time() - self.__start_time

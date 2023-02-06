@@ -1,4 +1,4 @@
 out/
 __pycache__/
 .vscode/
-test/{in,out}.txt
+test/*.txt

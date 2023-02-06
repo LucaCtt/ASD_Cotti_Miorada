@@ -7,6 +7,7 @@ from datetime import datetime
 import math
 import random
 import numpy as np
+from scipy import sparse
 
 
 @dataclass
@@ -14,6 +15,7 @@ class SudokuInstance:
     """Represents a sudoku puzzle converted to an instance of the EC problem."""
 
     input_matrix: np.ndarray
+    input_matrix_sparse: sparse.spmatrix
     sudoku: 'Sudoku'
     dim: int  # Puzzle dimension
     difficulty: float  # Between 0 and 1
@@ -100,12 +102,13 @@ class Sudoku:  # pylint: disable=too-few-public-methods
                 self.board[row][col] = nums[pattern(row, col)]
 
 
-def gen_inst(dim: int, difficulty: float) -> SudokuInstance:
+def gen_inst(dim: int, difficulty: float, include_sparse: bool = False) -> SudokuInstance:
     """Generates a sudoku puzzle and converts it to an instance of the EC problem.
 
     Args:
         dim (int, optional): The dimension of the sudoku (dim x dim).
         diff (float, optional): The difficulty of the puzzle, between 0 and 1.
+        include_sparse (bool): True if the instance must include a sparse matrix representation. (default: False)
 
     Returns:
         SudokuInstance: The generated instance.
@@ -133,6 +136,8 @@ def gen_inst(dim: int, difficulty: float) -> SudokuInstance:
                 __set_constraint_row(sudoku, input_matrix, row, col, entry)
 
     return SudokuInstance(input_matrix=input_matrix,
+                          input_matrix_sparse=sparse.csr_matrix(
+                              input_matrix) if include_sparse else None,
                           sudoku=sudoku,
                           dim=dim,
                           difficulty=difficulty)

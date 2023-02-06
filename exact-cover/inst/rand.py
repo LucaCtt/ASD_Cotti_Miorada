@@ -32,7 +32,7 @@ def gen_inst(card_m: int,
         card_n (int): The cardinality of set N.
         prob (float): The probability of a bit to be 1. Must be between 0 and 1.
         guarantee_sol (bool): True if the instance must have at least one solution.
-        use_sparse (bool): True if the instance must be represented as a sparse matrix. (default: False)
+        include_sparse (bool): True if the instance must include a sparse matrix representation. (default: False)
 
 
     Returns:
