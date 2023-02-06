@@ -137,6 +137,9 @@ class SparseInputMatrix(InputMatrix[sparse.spmatrix]):
 
     def __iter__(self):
         return iter(self._input_matrix.toarray())
+    
+    def __sizeof__(self) -> int:
+        return self._input_matrix.data.nbytes
 
 
 class DenseInputMatrix(InputMatrix[np.ndarray]):
@@ -167,3 +170,6 @@ class DenseInputMatrix(InputMatrix[np.ndarray]):
 
     def rows_union(self, i: int, j: int) -> Tuple[np.ndarray, int]:
         return self.union(i, self._input_matrix[j])
+
+    def __sizeof__(self) -> int:
+        return self._input_matrix.nbytes

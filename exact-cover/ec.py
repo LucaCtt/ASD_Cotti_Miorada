@@ -6,6 +6,7 @@ along with the functions to read and write the input and output files.
 from collections import deque
 from datetime import datetime
 from dataclasses import dataclass
+import sys
 import time
 from typing import Tuple
 import numpy as np
