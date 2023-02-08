@@ -54,7 +54,7 @@ I test per verificare la performance dell'implementazione si trovano in
 
 ## Requisiti
 
-Per avviare il progetto è richiesto Python 3.9 o superiore.
+Per avviare il progetto è richiesto Python 3.8 o superiore.
 
 Dopoiché è possibile installare le dipendenze indicate in `requirements.txt`.
 Per esempio, con `pip`:
