@@ -48,6 +48,8 @@ class Sudoku:  # pylint: disable=too-few-public-methods
         Returns:
             Sudoku: The puzzle.
         """
+        if difficulty <= 0 or difficulty >= 1:
+            return ValueError("Difficulty must strictly be between 0 and 1.")
 
         puzzle_board = self.board.copy()
 

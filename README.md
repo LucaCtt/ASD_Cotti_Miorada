@@ -126,6 +126,7 @@ Le opzioni supportate sono:
 - `-o`, `--output`: file su cui salvare il risultato dell'algoritmo (default: `test/out.txt`);
 - `-p`, `--plus`: se deve essere eseguito l'algoritmo EC+ (default: `False`);
 - `-t`, `--time`: tempo massimo di esecuzione dell'algoritmo in secondi (opzionale).
+- `-s`, `--sparse`: se deve essere usata la rappresentazione sparsa (default: `False`).
 
 Il seguente comando esegue l'algoritmo EC+ sull'istanza di test `test/100x100x05.txt`,
 salvando il risultato in `test/out.txt` e senza limitare il tempo di esecuzione:
