@@ -94,7 +94,7 @@ Le opzioni disponibili sono:
 - `-o`, `--output`: file su cui salvare l'istanza generata (default: `test/in.txt`);
 - `-m`, `--mdim`: cardinalità dell'insieme M (default: `10`);
 - `-n`, `--ndim`: cardinalità dell'insieme N (default: `10`);
-- `-p`, `--prob`: probabilità di generaee 1 nella distribuzione binomiale (default: `0.5`);
+- `-p`, `--prob`: probabilità di generare 1 nella distribuzione binomiale (default: `0.5`);
 - `-g`, `--guarantee`: se deve essere garantita almeno una soluzione all'istanza generata (default: `False`).
 
 Per esempio, per generare un'istanza di test casuale con `100` elementi in M, `100` elementi in N,
