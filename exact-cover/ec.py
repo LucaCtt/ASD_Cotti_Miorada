@@ -13,20 +13,6 @@ from inst import sudoku
 from input_matrix import InputMatrix, DenseInputMatrix, SparseInputMatrix
 
 
-class Indexes:
-    def __init__(self, iterable: Iterable = [], use_stack: bool = False) -> None:
-        self._indexes = deque(iterable) if use_stack else list(iterable)
-
-    def to_array(self) -> np.ndarray:
-        return np.array(self._indexes)
-
-    def append(self, k: int):
-        self._indexes.append(k)
-
-    def pop(self) -> int:
-        return self._indexes.pop()
-
-
 @dataclass
 class Result:
     """Represents the results of the EC algorithm."""
@@ -111,7 +97,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 if nnz_inter > 0:
                     self._compat_matrix[j, i] = 0
                 else:
-                    indexes = Indexes([i, j], self.__use_stack)
+                    indexes = deque([i, j]) if self.__use_stack else [i, j]
                     union_value, is_cov = self._get_union_value(i, j)
 
                     # If the union of the two rows is equal to M,
@@ -157,19 +143,29 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 self._visited_nodes += 1
 
                 # Try to add A[k] to the coverage.
-                indexes.append(k)
+                indexes_temp = None
+                if self.__use_stack:
+                    indexes.append(k)
+                    indexes_temp = indexes
+                else:
+                    indexes_temp = indexes + [k]
+
                 union_value_temp, is_cov = self._get_union_value_temp(
                     union_value, k)
 
                 if is_cov:
-                    self._coverages.append(np.array(indexes))
-                    indexes.pop()
+                    self._coverages.append(np.array(indexes_temp))
+                    if self.__use_stack:
+                        indexes_temp.pop()
                 else:
                     inter_temp = np.bitwise_and(
                         inter[0:k], self._compat_matrix[0:k, k])
                     if np.any(inter_temp != 0):
-                        self.__esplora(indexes, union_value_temp, inter_temp)
-                    indexes.pop()
+                        self.__esplora(
+                            indexes_temp, union_value_temp, inter_temp)
+
+                    if self.__use_stack:
+                        indexes_temp.pop()
 
     def __execution_time(self) -> float:
         return time.process_time() - self.__start_time
