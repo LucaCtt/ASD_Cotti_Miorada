@@ -19,9 +19,10 @@ def __ec_cmd():
 
     alg = None
     if args.plus:
-        alg = ec.ECPlus(input_matrix, time_limit=args.time)
+        alg = ec.ECPlus(input_matrix, time_limit=args.time,
+                        use_stack=args.stack)
     else:
-        alg = ec.EC(input_matrix, time_limit=args.time)
+        alg = ec.EC(input_matrix, time_limit=args.time, use_stack=args.stack)
 
     signal.signal(signal.SIGINT, lambda *_: alg.stop())
 

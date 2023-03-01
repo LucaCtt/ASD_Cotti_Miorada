@@ -6,12 +6,25 @@ along with the functions to read and write the input and output files.
 from collections import deque
 from datetime import datetime
 from dataclasses import dataclass
-import sys
 import time
-from typing import Tuple
+from typing import Iterable, Tuple
 import numpy as np
 from inst import sudoku
 from input_matrix import InputMatrix, DenseInputMatrix, SparseInputMatrix
+
+
+class Indexes:
+    def __init__(self, iterable: Iterable = [], use_stack: bool = False) -> None:
+        self._indexes = deque(iterable) if use_stack else list(iterable)
+
+    def to_array(self) -> np.ndarray:
+        return np.array(self._indexes)
+
+    def append(self, k: int):
+        self._indexes.append(k)
+
+    def pop(self) -> int:
+        return self._indexes.pop()
 
 
 @dataclass
@@ -39,10 +52,11 @@ class Result:
 class EC:  # pylint: disable=too-many-instance-attributes
     """The basic EC algorithm."""
 
-    def __init__(self, input_matrix: InputMatrix, time_limit: float = None):
+    def __init__(self, input_matrix: InputMatrix, time_limit: float = None, use_stack: bool = False):
         # A
         self._input_matrix = input_matrix
         self._n, self._m = input_matrix.shape
+        self.__use_stack = use_stack
 
         # B
         self._compat_matrix = np.zeros((self._n, self._n), dtype=int)
@@ -97,7 +111,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 if nnz_inter > 0:
                     self._compat_matrix[j, i] = 0
                 else:
-                    indexes = deque([i, j])
+                    indexes = Indexes([i, j], self.__use_stack)
                     union_value, is_cov = self._get_union_value(i, j)
 
                     # If the union of the two rows is equal to M,
@@ -177,8 +191,8 @@ class ECPlus(EC):
     """Implementation of the EC plus algorithm.
     """
 
-    def __init__(self, input_matrix: InputMatrix, time_limit: float = None):
-        super().__init__(input_matrix, time_limit)
+    def __init__(self, input_matrix: InputMatrix, time_limit: float = None, use_stack: bool = False):
+        super().__init__(input_matrix, time_limit, use_stack)
         self.__card = input_matrix.nonzero_per_col()
 
     def start(self):

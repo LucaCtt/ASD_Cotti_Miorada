@@ -39,6 +39,12 @@ __parser_ec.add_argument("-s",
                          help="Use sparse matrix representation.",
                          action=argparse.BooleanOptionalAction,
                          default=False)
+__parser_ec.add_argument("-k",
+                         "--stack",
+                         type=bool,
+                         help="Use stack for indices.",
+                         action=argparse.BooleanOptionalAction,
+                         default=False)
 
 # Parser for the gen subcommand
 __parser_gen = __subparser.add_parser('gen',
