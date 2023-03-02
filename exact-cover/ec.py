@@ -97,7 +97,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 if nnz_inter > 0:
                     self._compat_matrix[j, i] = 0
                 else:
-                    indexes = deque([i, j]) if self.__use_stack else [i, j]
+                    indexes = deque([i, j]) if self.__use_stack else np.array([i, j])
                     union_value, is_cov = self._get_union_value(i, j)
 
                     # If the union of the two rows is equal to M,
@@ -148,7 +148,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
                     indexes.append(k)
                     indexes_temp = indexes
                 else:
-                    indexes_temp = indexes + [k]
+                    indexes_temp = np.append(indexes, k)
 
                 union_value_temp, is_cov = self._get_union_value_temp(
                     union_value, k)
