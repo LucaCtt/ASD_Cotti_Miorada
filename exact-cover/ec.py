@@ -68,6 +68,11 @@ class EC:  # pylint: disable=too-many-instance-attributes
         self.__stop_flag = True
 
     def start(self) -> Result:
+        # Check if there are empty columns.
+        empty_idxs = np.argwhere(np.all(self._input_matrix[..., :] == 0, axis=0))
+        if empty_idxs.size > 0:
+            raise ValueError(f"Empty columns at indexes {empty_idxs}")
+
         """Start the algorithm."""
         for i in range(self._n):
             if self.__should_stop():
