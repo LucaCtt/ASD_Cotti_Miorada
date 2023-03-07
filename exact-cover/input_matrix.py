@@ -100,7 +100,10 @@ class InputMatrix(ABC, Generic[T]):
     @abstractmethod
     def nonzero_per_col(self):
         pass
-    
+
+    @abstractmethod
+    def is_valid(self):
+        pass
 
     def __iter__(self):
         return iter(self._input_matrix)
@@ -135,9 +138,12 @@ class SparseInputMatrix(InputMatrix[sparse.spmatrix]):
     def rows_union(self, i: int, j: int) -> Tuple[sparse.spmatrix, bool]:
         return self.union(i, self._input_matrix[j])
 
+    def is_valid(self):
+        return self.nonzero_per_col().min() > 0
+
     def __iter__(self):
         return iter(self._input_matrix.toarray())
-    
+
     def __sizeof__(self) -> int:
         return self._input_matrix.data.nbytes
 
@@ -170,6 +176,9 @@ class DenseInputMatrix(InputMatrix[np.ndarray]):
 
     def rows_union(self, i: int, j: int) -> Tuple[np.ndarray, int]:
         return self.union(i, self._input_matrix[j])
+
+    def is_valid(self):
+        return self.nonzero_per_col().min() > 0
 
     def __sizeof__(self) -> int:
         return self._input_matrix.nbytes

@@ -39,6 +39,10 @@ class EC:  # pylint: disable=too-many-instance-attributes
     """The basic EC algorithm."""
 
     def __init__(self, input_matrix: InputMatrix, time_limit: float = None, use_stack: bool = False):
+        # Check if the input matrix is valid
+        if not input_matrix.is_valid():
+            raise ValueError("Input matrix is not valid")
+
         # A
         self._input_matrix = input_matrix
         self._n, self._m = input_matrix.shape
@@ -68,11 +72,6 @@ class EC:  # pylint: disable=too-many-instance-attributes
         self.__stop_flag = True
 
     def start(self) -> Result:
-        # Check if there are empty columns.
-        empty_idxs = np.argwhere(np.all(self._input_matrix[..., :] == 0, axis=0))
-        if empty_idxs.size > 0:
-            raise ValueError(f"Empty columns at indexes {empty_idxs}")
-
         """Start the algorithm."""
         for i in range(self._n):
             if self.__should_stop():
@@ -102,7 +101,8 @@ class EC:  # pylint: disable=too-many-instance-attributes
                 if nnz_inter > 0:
                     self._compat_matrix[j, i] = 0
                 else:
-                    indexes = deque([i, j]) if self.__use_stack else np.array([i, j])
+                    indexes = deque(
+                        [i, j]) if self.__use_stack else np.array([i, j])
                     union_value, is_cov = self._get_union_value(i, j)
 
                     # If the union of the two rows is equal to M,
