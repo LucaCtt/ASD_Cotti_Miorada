@@ -92,9 +92,9 @@ Nella cartella `test` è possibile trovare delle istanze di test già generate (
 
 Le opzioni disponibili sono:
 - `-o`, `--output`: file su cui salvare l'istanza generata (default: `test/in.txt`);
-- `-m`, `--mdim`: cardinalità dell'insieme M (default: `10`);
-- `-n`, `--ndim`: cardinalità dell'insieme N (default: `10`);
-- `-p`, `--prob`: probabilità di generare 1 nella distribuzione binomiale (default: `0.5`);
+- `-m`, `--mdim`: cardinalità dell'insieme M, maggiore di 0 (default: `10`);
+- `-n`, `--ndim`: cardinalità dell'insieme N, maggiore di 0 (default: `10`);
+- `-p`, `--prob`: probabilità di generare 1 nella distribuzione binomiale, maggiore di 0 e minore o uguale a 1 (default: `0.5`);
 - `-g`, `--guarantee`: se deve essere garantita almeno una soluzione all'istanza generata (default: `False`).
 
 Per esempio, per generare un'istanza di test casuale con `100` elementi in M, `100` elementi in N,
@@ -108,8 +108,8 @@ python exact-cover gen rand -o test/100x100x05.txt -m 100 -n 100 -p 0.5
 
 La generazione di sudoku è configurabile con le seguenti opzioni:
 - `-o`, `--output`: file su cui salvare l'istanza generata (default: `test/in.txt`);
-- `-s`, `--side-dim`: dimensione (del lato) del sudoku (default: `9`);
-- `-d`, `--diff`: difficoltà del sudoku, da 0 (sudoku pieno) a 1 (sudoku vuoto) (default: `0.3`);
+- `-s`, `--side-dim`: dimensione (del lato) del sudoku, maggiore di 0 (default: `9`);
+- `-d`, `--diff`: difficoltà del sudoku, maggiore di 0 (sudoku pieno) e minore di 1 (sudoku vuoto) (default: `0.3`);
 
 Per esempio, per generare un'istanza sudoku `9x9`, con difficoltà pari a `0.3`:
 

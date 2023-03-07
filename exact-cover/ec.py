@@ -176,7 +176,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
         return time.process_time() - self.__start_time
 
     def __time_limit_reached(self) -> bool:
-        if self.__time_limit == -1:
+        if self.__time_limit < 0:
             return False
 
         return self.__execution_time() > self.__time_limit

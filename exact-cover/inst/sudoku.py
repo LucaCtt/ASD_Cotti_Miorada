@@ -115,6 +115,11 @@ def gen_inst(dim: int, difficulty: float, include_sparse: bool = False) -> Sudok
     Returns:
         SudokuInstance: The generated instance.
     """
+    if dim <= 0:
+        raise ValueError("Dimension must be strictly positive.")
+
+    if difficulty <= 0 or difficulty >= 1:
+        raise ValueError("Difficulty must strictly be between 0 and 1.")
 
     sudoku = Sudoku(dim).gen_puzzle(difficulty)
 

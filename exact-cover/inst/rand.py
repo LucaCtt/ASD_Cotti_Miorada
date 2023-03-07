@@ -40,6 +40,9 @@ def gen_inst(card_m: int,
         Inst: The generated instance.
     """
 
+    if card_m <= 0 or card_n <= 0 or prob <= 0.0 or prob > 1:
+        raise ValueError('Invalid input')
+
     # There are at most 2^M unique rows,
     # so if N >= 2^M it is not possible to generate all different rows.
     if card_n >= 2**card_m:
