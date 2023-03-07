@@ -99,10 +99,12 @@ class InputMatrix(ABC, Generic[T]):
 
     @abstractmethod
     def nonzero_per_col(self):
+        """Computes the number of ones per column."""
         pass
 
     @abstractmethod
     def is_valid(self):
+        """Check if the input matrix is valid."""
         pass
 
     def __iter__(self):
