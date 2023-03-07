@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from scipy import sparse
 
+# Generic type variable for the internal representation of the input matrix.
 T = TypeVar('T')
 
 
@@ -98,12 +99,12 @@ class InputMatrix(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def nonzero_per_col(self):
+    def nonzero_per_col(self) -> T:
         """Computes the number of ones per column."""
         pass
 
     @abstractmethod
-    def is_valid(self):
+    def is_valid(self) -> bool:
         """Check if the input matrix is valid."""
         pass
 
@@ -134,13 +135,13 @@ class SparseInputMatrix(InputMatrix[sparse.spmatrix]):
         union = self._input_matrix[i] + array
         return union, union.nnz
 
-    def nonzero_per_col(self):
+    def nonzero_per_col(self) -> sparse.spmatrix:
         return self._input_matrix.getnnz(axis=1)
 
     def rows_union(self, i: int, j: int) -> Tuple[sparse.spmatrix, bool]:
         return self.union(i, self._input_matrix[j])
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         return self.nonzero_per_col().min() > 0
 
     def __iter__(self):
@@ -173,13 +174,13 @@ class DenseInputMatrix(InputMatrix[np.ndarray]):
         union = np.bitwise_or(self._input_matrix[i], array)
         return union, np.count_nonzero(union)
 
-    def nonzero_per_col(self):
+    def nonzero_per_col(self) -> np.ndarray:
         return np.count_nonzero(self._input_matrix, axis=1)
 
     def rows_union(self, i: int, j: int) -> Tuple[np.ndarray, int]:
         return self.union(i, self._input_matrix[j])
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         return self.nonzero_per_col().min() > 0
 
     def __sizeof__(self) -> int:

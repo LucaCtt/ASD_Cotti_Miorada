@@ -24,9 +24,9 @@ __parser_ec.add_argument("-o",
                          default="test/out.txt")
 __parser_ec.add_argument("-t",
                          "--time",
-                         type=int,
+                         type=float,
                          help="Max execution time.",
-                         default=None)
+                         default=-1)
 __parser_ec.add_argument("-p",
                          "--plus",
                          type=bool,

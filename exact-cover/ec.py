@@ -25,7 +25,7 @@ class Result:
     time_limit_reached: bool
     plus: bool = False
 
-    def __eq__(self, __o: object) -> bool:
+    def __eq__(self, __o: 'Result') -> bool:
         return self.coverages == __o.coverages \
             and self.visited_nodes == __o.visited_nodes\
             and self.total_nodes == __o.total_nodes
@@ -38,7 +38,7 @@ class Result:
 class EC:  # pylint: disable=too-many-instance-attributes
     """The basic EC algorithm."""
 
-    def __init__(self, input_matrix: InputMatrix, time_limit: float = None, use_stack: bool = False):
+    def __init__(self, input_matrix: InputMatrix, time_limit: float = -1, use_stack: bool = False):
         # Check if the input matrix is valid
         if not input_matrix.is_valid():
             raise ValueError("Input matrix is not valid")
@@ -176,7 +176,7 @@ class EC:  # pylint: disable=too-many-instance-attributes
         return time.process_time() - self.__start_time
 
     def __time_limit_reached(self) -> bool:
-        if self.__time_limit is None:
+        if self.__time_limit == -1:
             return False
 
         return self.__execution_time() > self.__time_limit
@@ -192,7 +192,7 @@ class ECPlus(EC):
     """Implementation of the EC plus algorithm.
     """
 
-    def __init__(self, input_matrix: InputMatrix, time_limit: float = None, use_stack: bool = False):
+    def __init__(self, input_matrix: InputMatrix, time_limit: float = -1, use_stack: bool = False):
         super().__init__(input_matrix, time_limit, use_stack)
         self.__card = input_matrix.nonzero_per_col()
 

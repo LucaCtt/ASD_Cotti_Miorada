@@ -4,6 +4,7 @@ Generation of random instances for the EC problem.
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 import numpy as np
 from scipy import sparse
 
@@ -13,7 +14,7 @@ class RandomInstance:
     """Represents a random instance of the EC problem."""
 
     input_matrix: np.ndarray
-    input_matrix_sparse: sparse.spmatrix
+    input_matrix_sparse: Optional[sparse.spmatrix]
     prob: float
     guarantee_sol: bool
     fixed_zero_col: bool
@@ -113,26 +114,3 @@ def write_to_file(output_file: str, inst: RandomInstance):
 
         for row in inst.input_matrix:
             file.write(f'\n{np.array2string(row)[1:-1]} -')
-
-
-def read_from_file(input_file: str) -> RandomInstance:
-    """Reads an instance from a file.
-
-    Args:
-        input_file (str): The file where to read the instance.
-
-    Returns:
-        Inst: The read instance.
-    """
-    input_matrix = []
-
-    with open(input_file, "r", encoding="utf-8") as file:
-        for line in file:
-            if ';;;' in line:
-                continue
-            if '-' in line:
-                line = list(line.split())
-                elements = []
-                for element in line[0:-1]:
-                    elements.append(int(element))
-                input_matrix.append(elements)

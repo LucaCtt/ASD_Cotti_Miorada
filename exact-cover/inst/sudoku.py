@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import math
 import random
+from typing import Optional
 import numpy as np
 from scipy import sparse
 
@@ -15,7 +16,7 @@ class SudokuInstance:
     """Represents a sudoku puzzle converted to an instance of the EC problem."""
 
     input_matrix: np.ndarray
-    input_matrix_sparse: sparse.spmatrix
+    input_matrix_sparse: Optional[sparse.spmatrix]
     sudoku: 'Sudoku'
     dim: int  # Puzzle dimension
     difficulty: float  # Between 0 and 1
@@ -25,7 +26,7 @@ class SudokuInstance:
 class Sudoku:  # pylint: disable=too-few-public-methods
     """Rappresents a Sudoku."""
 
-    def __init__(self, dim: int, board: np.ndarray = None):
+    def __init__(self, dim: int, board: Optional[np.ndarray] = None):
         # The sudoku has dimension dim x dim
         self.dim = dim
 
@@ -33,10 +34,7 @@ class Sudoku:  # pylint: disable=too-few-public-methods
         self.base = math.isqrt(dim)
 
         # The board is a dim x dim matrix
-        self.board = board
-
-        if self.board is None:
-            self.__create_board()
+        self.board = self.__create_board() if board is None else board
 
     def gen_puzzle(self, difficulty: float) -> 'Sudoku':
         """Generates a puzzle from the board, by removing some cells.
@@ -49,7 +47,7 @@ class Sudoku:  # pylint: disable=too-few-public-methods
             Sudoku: The puzzle.
         """
         if difficulty <= 0 or difficulty >= 1:
-            return ValueError("Difficulty must strictly be between 0 and 1.")
+            raise ValueError("Difficulty must strictly be between 0 and 1.")
 
         puzzle_board = self.board.copy()
 
@@ -80,10 +78,10 @@ class Sudoku:  # pylint: disable=too-few-public-methods
         )
         return Sudoku(dim=dim, board=board)
 
-    def __create_board(self):
+    def __create_board(self) -> np.ndarray:
         # See https://stackoverflow.com/a/56581709
 
-        self.board = np.zeros((self.dim, self.dim), dtype=int)
+        board = np.zeros((self.dim, self.dim), dtype=int)
 
         def shuffle(population):
             return random.sample(population, len(population))
@@ -101,7 +99,9 @@ class Sudoku:  # pylint: disable=too-few-public-methods
 
         for row in rows:
             for col in cols:
-                self.board[row][col] = nums[pattern(row, col)]
+                board[row][col] = nums[pattern(row, col)]
+
+        return board
 
 
 def gen_inst(dim: int, difficulty: float, include_sparse: bool = False) -> SudokuInstance:

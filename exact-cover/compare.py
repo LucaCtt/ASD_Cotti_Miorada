@@ -2,10 +2,11 @@
 Utility functions to check the outputs of EC and EC plus algorithms.
 """
 
+from typing import Tuple
 import ec
 
 
-def compare_results(input_files: list) -> list:
+def compare_results(input_files: list) -> Tuple[bool, float, int]:
     """Compares the EC results in the input files.
     Will return an error if the results are not equal, ie
     they refer to different problems.
