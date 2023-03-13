@@ -136,7 +136,7 @@ class SparseInputMatrix(InputMatrix[sparse.spmatrix]):
         return union, union.nnz
 
     def nonzero_per_col(self) -> sparse.spmatrix:
-        return self._input_matrix.getnnz(axis=1)
+        return self._input_matrix.getnnz(axis=0)
 
     def rows_union(self, i: int, j: int) -> Tuple[sparse.spmatrix, bool]:
         return self.union(i, self._input_matrix[j])
@@ -175,7 +175,7 @@ class DenseInputMatrix(InputMatrix[np.ndarray]):
         return union, np.count_nonzero(union)
 
     def nonzero_per_col(self) -> np.ndarray:
-        return np.count_nonzero(self._input_matrix, axis=1)
+        return np.count_nonzero(self._input_matrix, axis=0)
 
     def rows_union(self, i: int, j: int) -> Tuple[np.ndarray, int]:
         return self.union(i, self._input_matrix[j])
