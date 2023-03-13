@@ -99,6 +99,11 @@ class InputMatrix(ABC, Generic[T]):
         pass
 
     @abstractmethod
+    def nonzero_per_row(self) -> T:
+        """Computes the number of ones per row."""
+        pass
+
+    @abstractmethod
     def nonzero_per_col(self) -> T:
         """Computes the number of ones per column."""
         pass
@@ -134,6 +139,9 @@ class SparseInputMatrix(InputMatrix[sparse.spmatrix]):
     def union(self, i: int, array: sparse.spmatrix) -> Tuple[sparse.spmatrix, int]:
         union = self._input_matrix[i] + array
         return union, union.nnz
+
+    def nonzero_per_row(self) -> sparse.spmatrix:
+        return self._input_matrix.getnnz(axis=1)
 
     def nonzero_per_col(self) -> sparse.spmatrix:
         return self._input_matrix.getnnz(axis=0)
@@ -173,6 +181,9 @@ class DenseInputMatrix(InputMatrix[np.ndarray]):
     def union(self, i: int, array: np.ndarray) -> Tuple[np.ndarray, int]:
         union = np.bitwise_or(self._input_matrix[i], array)
         return union, np.count_nonzero(union)
+
+    def nonzero_per_row(self) -> np.ndarray:
+        return np.count_nonzero(self._input_matrix, axis=1)
 
     def nonzero_per_col(self) -> np.ndarray:
         return np.count_nonzero(self._input_matrix, axis=0)

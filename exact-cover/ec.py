@@ -194,7 +194,7 @@ class ECPlus(EC):
 
     def __init__(self, input_matrix: InputMatrix, time_limit: float = -1, use_stack: bool = False):
         super().__init__(input_matrix, time_limit, use_stack)
-        self.__card = input_matrix.nonzero_per_col()
+        self.__card = input_matrix.nonzero_per_row()
 
     def start(self):
         result = super().start()
